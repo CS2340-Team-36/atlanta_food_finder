@@ -1,0 +1,12 @@
+<h1>Nearby Restaurants</h1>
+
+<ul>
+    {% for restaurant in restaurants %}
+        <li>
+            <strong>{{ restaurant.name }}</strong><br>
+            Rating: {{ restaurant.rating }}<br>
+            Address: {{ restaurant.vicinity }}<br>
+            <a href="{% url 'restaurant_detail' restaurant.place_id %}">View Details</a>
+        </li>
+    {% endfor %}
+</ul>
