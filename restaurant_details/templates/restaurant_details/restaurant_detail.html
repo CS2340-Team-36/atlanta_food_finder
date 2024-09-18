@@ -1,0 +1,15 @@
+<h1>{{ restaurant.name }}</h1>
+<p><strong>Address:</strong> {{ restaurant.formatted_address }}</p>
+<p><strong>Phone:</strong> {{ restaurant.formatted_phone_number }}</p>
+<p><strong>Rating:</strong> {{ restaurant.rating }}</p>
+<p><strong>Website:</strong> <a href="{{ restaurant.website }}">{{ restaurant.website }}</a></p>
+
+<h2>Reviews:</h2>
+<ul>
+    {% for review in restaurant.reviews %}
+        <li>
+            <strong>{{ review.author_name }}</strong>: {{ review.text }}<br>
+            Rating: {{ review.rating }}
+        </li>
+    {% endfor %}
+</ul>

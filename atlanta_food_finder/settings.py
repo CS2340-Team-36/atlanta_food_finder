@@ -27,6 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+GOOGLE_API_KEY = 'AIzaSyDe39jHRou9FyAwtXDmqtMG2WglTXs7IkA'
+
 
 # Application definition
 
@@ -37,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'restaurant_details',
     'user_accounts'
 ]
 
