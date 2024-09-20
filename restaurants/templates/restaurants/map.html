@@ -1,0 +1,41 @@
+<!-- restaurants/templates/restaurants/map.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Map</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDe39jHRou9FyAwtXDmqtMG2WglTXs7IkA"></script>
+    <script>
+        function initMap() {
+            var mapOptions = {
+                center: { lat: 33.7490, lng: -84.3880 }, // Atlanta coordinates
+                zoom: 12
+            };
+            var map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+            var restaurants = JSON.parse('{{ restaurants|safe }}');
+
+            restaurants.forEach(function(restaurant) {
+                var marker = new google.maps.Marker({
+                    position: { lat: parseFloat(restaurant.latitude), lng: parseFloat(restaurant.longitude) },
+                    map: map,
+                    title: restaurant.name
+                });
+
+                var infowindow = new google.maps.InfoWindow({
+                    content: '<h3>${restaurant.name}</h3><p>${restaurant.address}</p>'
+                });
+
+                marker.addListener('click', function() {
+                    infowindow.open(map, marker);
+                });
+            });
+        }
+    </script>
+</head>
+<body onload="initMap()">
+    <h1>Restaurant Map</h1>
+    <div id="map" style="height: 500px; width: 100%;"></div>
+</body>
+</html>

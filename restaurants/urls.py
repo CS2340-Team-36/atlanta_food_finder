@@ -1,8 +1,6 @@
-# restaurants/urls.py
-
 from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('restaurants', views.restaurant_search, name='restaurant_search'),
+    path('map/', views.restaurant_map, name='restaurant_map'),
 ]
