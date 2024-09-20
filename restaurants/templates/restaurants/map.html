@@ -1,41 +1,115 @@
-<!-- restaurants/templates/restaurants/map.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Restaurant Map</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDe39jHRou9FyAwtXDmqtMG2WglTXs7IkA"></script>
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+        #info {
+            margin-top: 20px;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h1>Restaurant Map</h1>
+    <div id="map"></div>
+    <div id="info"></div>
+
     <script>
+        let map;
+        let infoWindow;
+
         function initMap() {
-            var mapOptions = {
-                center: { lat: 33.7490, lng: -84.3880 }, // Atlanta coordinates
-                zoom: 12
+            // Initialize the map centered on Atlanta
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 33.7490, lng: -84.3880 }, // Centered on Atlanta
+                zoom: 12,
+            });
+
+            // Initialize the info window to display restaurant details
+            infoWindow = new google.maps.InfoWindow();
+
+            map.addListener('idle', () => {
+                searchNearbyPlaces(map.getCenter());
+            });
+
+            // Create a request object for Places API to find nearby restaurants
+            // const types = ['restaurant', 'cafe', 'diner', 'bakery'];
+            // types.forEach(type => {
+            //     const request = {
+            //         location: map.getCenter(),
+            //         radius: '20000',
+            //         type: type
+            //     };
+
+            //     const service = new google.maps.places.PlacesService(map);
+            //     service.nearbySearch(request, (results, status) => {
+            //         if (status === google.maps.places.PlacesServiceStatus.OK) {
+            //             results.forEach(place => {
+            //                 createMarker(place);
+            //             });
+            //         }
+            //     });
+            // });
+        }
+
+        function searchNearbyPlaces(location) {
+            const request = {
+                location: location,
+                radius: '20000',
+                types: ['restaurant', 'cafe', 'diner', 'bakery', 'Indian restaurant']
             };
-            var map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
-            var restaurants = JSON.parse('{{ restaurants|safe }}');
+            const service = new google.maps.places.PlacesService(map);
+            service.nearbySearch(request, handleResults);
+        }
 
-            restaurants.forEach(function(restaurant) {
-                var marker = new google.maps.Marker({
-                    position: { lat: parseFloat(restaurant.latitude), lng: parseFloat(restaurant.longitude) },
-                    map: map,
-                    title: restaurant.name
+        function handleResults(results, status, pagination) {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                results.forEach(place => {
+                    createMarker(place);
                 });
+            }
+            // Check if there are more results to fetch
+            if (pagination && pagination.hasNextPage) {
+                setTimeout(() => {
+                    pagination.nextPage(); // Fetch next set of results
+                }, 2000);  // Adding delay to prevent hitting API limits
+            }
+        }
 
-                var infowindow = new google.maps.InfoWindow({
-                    content: '<h3>${restaurant.name}</h3><p>${restaurant.address}</p>'
-                });
+        // Function to create markers for each restaurant found
+        function createMarker(place) {
+            const marker = new google.maps.Marker({
+                map: map,
+                position: place.geometry.location,
+            });
 
-                marker.addListener('click', function() {
-                    infowindow.open(map, marker);
+            // Add click listener to each marker to display restaurant details
+            google.maps.event.addListener(marker, 'click', () => {
+                // Fetch more detailed information about the selected place
+                const service = new google.maps.places.PlacesService(map);
+                service.getDetails({ placeId: place.place_id }, (details, status) => {
+                    if (status === google.maps.places.PlacesServiceStatus.OK) {
+                        // Display restaurant info below the map
+                        document.getElementById('info').innerHTML = `
+                            <h2>${details.name}</h2>
+                            <p>${details.formatted_address}</p>
+                            <p>Rating: ${details.rating}</p>
+                            <p>${details.formatted_phone_number || 'Phone number not available'}</p>
+                        `;
+                    }
                 });
             });
         }
     </script>
-</head>
-<body onload="initMap()">
-    <h1>Restaurant Map</h1>
-    <div id="map" style="height: 500px; width: 100%;"></div>
+
+    <!-- Load the Google Maps JavaScript API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDe39jHRou9FyAwtXDmqtMG2WglTXs7IkA&libraries=places&callback=initMap" async defer></script>
 </body>
 </html>
