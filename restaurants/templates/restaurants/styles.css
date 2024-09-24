@@ -1,0 +1,20 @@
+/* Highlight the selected restaurant block */
+.restaurant-block.highlight {
+    background-color: #f0f8ff;
+    border-left: 5px solid #007bff;
+  }
+  
+  /* Style for the dropdown details */
+  .dropdown-details {
+    display: none;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+  }
+  
+  /* When the dropdown is open, display it */
+  .dropdown-details.open {
+    display: block;
+  }
+  

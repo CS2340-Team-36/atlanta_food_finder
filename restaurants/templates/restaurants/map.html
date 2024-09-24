@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Restaurant Map</title>
+
+    <link rel="stylesheet" href="styles.css">
     <style>
         #map {
             height: 500px;
-            width: 100%;
+            width: 50%;
         }
         #info {
             margin-top: 20px;
@@ -17,12 +19,49 @@
 </head>
 <body>
     <h1>Restaurant Map</h1>
-    <div id="map"></div>
+    
+    <!-- Filter Bar -->
+    <div id="filter-bar">
+        <label for="radius">Radius:</label>
+        <select id="radius">
+            <option value="8047">5 miles</option>
+            <option value="16094">10 miles</option>
+            <option value="32187">20 miles</option>
+        </select>
+
+        <label for="cuisine">Cuisine:</label>
+        <select id="cuisine">
+            <option value="">All</option>
+            <option value="mexican">Mexican</option>
+            <option value="indian">Indian</option>
+            <option value="chinese">Chinese</option>
+            <option value="italian">Italian</option>
+            <option value="american">American</option>
+            <option value="thai">Thai</option>
+            <option value="japanese">Japanese</option>
+        </select>
+
+        <label for="rating">Minimum Rating:</label>
+        <select id="rating">
+            <option value="0">All</option>
+            <option value="3.5">3.5+</option>
+            <option value="4">4.0+</option>
+            <option value="4.5">4.5+</option>
+        </select>
+
+        <button onclick="applyFilters()">Apply Filters</button>
+    </div>
+
     <div id="info"></div>
+    <div id="map" style="height: 100vh; width: 60%; float: left;"></div>
+    <div id="restaurant-list" style="height: 100vh; width: 30%; float: right; overflow-y: auto; padding: 10px; border-left: 1px solid #ccc;"></div>
+
 
     <script>
         let map;
         let infoWindow;
+        let markers = [];  // Array to hold all markers
+
 
         function initMap() {
             // Initialize the map centered on Atlanta
@@ -34,71 +73,153 @@
             // Initialize the info window to display restaurant details
             infoWindow = new google.maps.InfoWindow();
 
+            // Initially, search for all nearby places when the map is idle
             map.addListener('idle', () => {
                 searchNearbyPlaces(map.getCenter());
             });
-
-            // Create a request object for Places API to find nearby restaurants
-            // const types = ['restaurant', 'cafe', 'diner', 'bakery'];
-            // types.forEach(type => {
-            //     const request = {
-            //         location: map.getCenter(),
-            //         radius: '20000',
-            //         type: type
-            //     };
-
-            //     const service = new google.maps.places.PlacesService(map);
-            //     service.nearbySearch(request, (results, status) => {
-            //         if (status === google.maps.places.PlacesServiceStatus.OK) {
-            //             results.forEach(place => {
-            //                 createMarker(place);
-            //             });
-            //         }
-            //     });
-            // });
         }
 
         function searchNearbyPlaces(location) {
+            const radius = document.getElementById('radius').value || '8047'; // Default to 5 miles
+            const cuisine = document.getElementById('cuisine').value;
+            const minRating = document.getElementById('rating').value || '0';
+
             const request = {
                 location: location,
-                radius: '20000',
-                types: ['restaurant', 'cafe', 'diner', 'bakery', 'Indian restaurant']
+                radius: radius, 
+                types: ['restaurant', 'cafe', 'diner', 'bakery', 'brewery', 'bar'], // Fixed case issues
             };
 
             const service = new google.maps.places.PlacesService(map);
-            service.nearbySearch(request, handleResults);
+            
+            // Clear existing markers before adding new ones
+            clearMarkers();
+
+            service.nearbySearch(request, (results, status, pagination) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    const filteredResults = results.filter(place => {
+                        // Filter based on rating
+                        if (place.rating && place.rating < minRating) {
+                            return false;
+                        }
+                        // Filter based on cuisine (if selected)
+                        if (cuisine && !isCuisineMatch(place, cuisine)) {
+                            return false;
+                        }
+                        return true;
+                    });
+
+                    // Log filteredResults to see if your filtering works
+                    console.log(filteredResults);
+
+                    // Create new markers for filtered results
+                    filteredResults.forEach(place => {
+                        createMarker(place);
+                    });
+
+                    // Fetch more results if available, apply filter to pagination as well
+                    if (pagination && pagination.hasNextPage) {
+                        setTimeout(() => {
+                            pagination.nextPage();
+                        }, 2000);
+                    }
+                }
+            });
         }
 
-        function handleResults(results, status, pagination) {
-            if (status === google.maps.places.PlacesServiceStatus.OK) {
-                results.forEach(place => {
-                    createMarker(place);
-                });
+
+
+        function isCuisineMatch(place, cuisine) {
+            const cuisineMap = {
+                mexican: ['mexican', 'taco'],
+                indian: ['indian', 'naan'],
+                chinese: ['noodle', 'chinese'],
+                italian: ['italian', 'pizza'],
+                american: ['burger', 'bbq', 'steak', 'diner', 'fast_food'],
+                thai: ['thai'],
+                japanese: ['japanese', 'sushi'],
+            };
+
+            const restaurantTypes = place.types || [];
+            const restaurantName = place.name ? place.name.toLowerCase() : '';
+
+            // Check if the restaurant name contains any keyword that matches the selected cuisine
+            if (cuisineMap[cuisine].some(keyword => restaurantName.includes(keyword))) {
+                return true;
             }
-            // Check if there are more results to fetch
-            if (pagination && pagination.hasNextPage) {
-                setTimeout(() => {
-                    pagination.nextPage(); // Fetch next set of results
-                }, 2000);  // Adding delay to prevent hitting API limits
-            }
+
+            // Check if the place types match the selected cuisine
+            return cuisineMap[cuisine].some(keyword => 
+                restaurantTypes.some(type => type.includes(keyword))
+            );
         }
 
-        // Function to create markers for each restaurant found
+
+        function applyFilters() {
+            const radius = document.getElementById('radius').value;
+            const cuisine = document.getElementById('cuisine').value;
+            const rating = document.getElementById('rating').value;
+
+            console.log(`Filters - Radius: ${radius}, Cuisine: ${cuisine}, Rating: ${rating}`);
+
+            // Refresh the map with new filters
+            searchNearbyPlaces(map.getCenter());
+        }
+
+
         function createMarker(place) {
             const marker = new google.maps.Marker({
                 map: map,
                 position: place.geometry.location,
             });
 
-            // Add click listener to each marker to display restaurant details
+            markers.push(marker);
+
+            // Add the restaurant name to the restaurant list
+            const restaurantListDiv = document.getElementById('restaurant-list');
+            const listItem = document.createElement('div');
+            listItem.style.cursor = 'pointer';
+            listItem.classList.add('restaurant-item');
+            listItem.innerHTML = `
+                <h3>${place.name}</h3>
+                <p>Rating: ${place.rating || 'N/A'}</p>
+                <div class="restaurant-details" style="display: none;">
+                    <p>Address: ${place.vicinity || 'N/A'}</p>
+                    <p>Price Level: ${place.price_level || 'N/A'}</p>
+                </div>
+            `;
+            restaurantListDiv.appendChild(listItem);
+
+            // Click event for list item to toggle restaurant details
+            listItem.addEventListener('click', function () {
+                const details = listItem.querySelector('.restaurant-details');
+                details.style.display = details.style.display === 'none' ? 'block' : 'none';
+                highlightItem(listItem);  // Highlight this item when clicked
+            });
+
+            // Add click listener to marker to show restaurant details in the scroll bar
             google.maps.event.addListener(marker, 'click', () => {
-                // Fetch more detailed information about the selected place
                 const service = new google.maps.places.PlacesService(map);
                 service.getDetails({ placeId: place.place_id }, (details, status) => {
                     if (status === google.maps.places.PlacesServiceStatus.OK) {
-                        // Display restaurant info below the map
+                        // Update the scroll bar list to show details when the marker is clicked
+                        const listItems = restaurantListDiv.querySelectorAll('.restaurant-item');
+                        listItems.forEach(item => {
+                            const heading = item.querySelector('h3');
+                            if (heading.innerText === details.name) {
+                                const detailsDiv = item.querySelector('.restaurant-details');
+                                detailsDiv.style.display = 'block';
+                                highlightItem(item);  // Highlight the clicked marker's corresponding restaurant
+                            } else {
+                                const detailsDiv = item.querySelector('.restaurant-details');
+                                detailsDiv.style.display = 'none';  // Collapse other restaurant details
+                            }
+                        });
+
+                        // Update the info section with restaurant details (if needed)
                         document.getElementById('info').innerHTML = `
                             <h2>${details.name}</h2>
+                            <p>Cuisine: ${getCuisineType(details)}</p>
                             <p>${details.formatted_address}</p>
                             <p>Rating: ${details.rating}</p>
                             <p>${details.formatted_phone_number || 'Phone number not available'}</p>
@@ -107,6 +228,85 @@
                 });
             });
         }
+
+        // Function to highlight the list item and remove highlight from others
+        function highlightItem(item) {
+            const allItems = document.querySelectorAll('.restaurant-item');
+            allItems.forEach(el => el.classList.remove('highlight'));  // Remove highlight from all
+            item.classList.add('highlight');  // Add highlight to the clicked one
+        }
+
+
+
+        function clearMarkers() {
+            for (let i = 0; i < markers.length; i++) {
+                markers[i].setMap(null);  // Remove marker from the map
+            }
+            markers = [];  // Clear the markers array
+
+            // Also clear the restaurant list
+            const restaurantListDiv = document.getElementById('restaurant-list');
+            restaurantListDiv.innerHTML = '';  // Clear the list
+        }
+
+
+        function getCuisineType(details) {
+            const cuisineMap = {
+                mexican: ['mexican'],
+                indian: ['indian'],
+                chinese: ['chinese'],
+                italian: ['italian', 'pizza'],
+                american: ['burger', 'bbq', 'steak', 'diner', 'fast_food'],
+                thai: ['thai'],
+                japanese: ['japanese', 'sushi'],
+            };
+
+            const restaurantName = details.name ? details.name.toLowerCase() : '';
+            const restaurantTypes = details.types || [];
+
+            for (const [cuisine, keywords] of Object.entries(cuisineMap)) {
+                if (keywords.some(keyword => restaurantName.includes(keyword))) {
+                    return capitalize(cuisine);
+                }
+            }
+
+            for (const [cuisine, keywords] of Object.entries(cuisineMap)) {
+                if (restaurantTypes.some(type => keywords.some(keyword => type.includes(keyword)))) {
+                    return capitalize(cuisine);
+                }
+            }
+
+            return 'Cuisine not available';
+        }
+
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function highlightRestaurant(restaurantId) {
+            // Remove highlight from all restaurant blocks
+            const allBlocks = document.querySelectorAll('.restaurant-block');
+            allBlocks.forEach(block => {
+                block.classList.remove('highlight');
+                block.querySelector('.restaurant-details').classList.remove('show');
+            });
+
+            // Highlight the clicked restaurant block
+            const selectedBlock = document.getElementById(restaurantId);
+            selectedBlock.classList.add('highlight');
+            selectedBlock.querySelector('.restaurant-details').classList.add('show');
+        }
+
+        // Add this function to handle when a marker is clicked
+        function onMarkerClick(restaurantId) {
+            // Highlight the corresponding restaurant block in the sidebar
+            highlightRestaurant(restaurantId);
+
+            // Optionally, scroll the restaurant block into view
+            const block = document.getElementById(restaurantId);
+            block.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
     </script>
 
     <!-- Load the Google Maps JavaScript API -->
