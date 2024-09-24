@@ -4,64 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Restaurant Map</title>
-
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <style>
-        #map {
-            height: 500px;
-            width: 50%;
-        }
-        #info {
-            margin-top: 20px;
-            font-family: Arial, sans-serif;
-        }
-    </style>
 </head>
-<body>
-    <h1>Restaurant Map</h1>
-    
+<body class="bg-gray-100 text-gray-900">
+    <h1 class="text-3xl font-bold text-center text-blue-600 mt-6 mb-4">Restaurant Map</h1>
+
     <!-- Filter Bar -->
-    <div id="filter-bar">
-        <label for="radius">Radius:</label>
-        <select id="radius">
-            <option value="8047">5 miles</option>
-            <option value="16094">10 miles</option>
-            <option value="32187">20 miles</option>
-        </select>
+    <div id="filter-bar" class="bg-blue-500 text-white p-4 flex justify-around items-center shadow-md">
+        <div class="flex items-center">
+            <label for="radius" class="font-semibold mr-2">Radius:</label>
+            <select id="radius" class="p-2 rounded bg-white text-gray-800">
+                <option value="8047">5 miles</option>
+                <option value="16094">10 miles</option>
+                <option value="32187">20 miles</option>
+            </select>
+        </div>
 
-        <label for="cuisine">Cuisine:</label>
-        <select id="cuisine">
-            <option value="">All</option>
-            <option value="mexican">Mexican</option>
-            <option value="indian">Indian</option>
-            <option value="chinese">Chinese</option>
-            <option value="italian">Italian</option>
-            <option value="american">American</option>
-            <option value="thai">Thai</option>
-            <option value="japanese">Japanese</option>
-        </select>
+        <div class="flex items-center">
+            <label for="cuisine" class="font-semibold mr-2">Cuisine:</label>
+            <select id="cuisine" class="p-2 rounded bg-white text-gray-800">
+                <option value="">All</option>
+                <option value="mexican">Mexican</option>
+                <option value="indian">Indian</option>
+                <option value="chinese">Chinese</option>
+                <option value="italian">Italian</option>
+                <option value="american">American</option>
+                <option value="thai">Thai</option>
+                <option value="japanese">Japanese</option>
+            </select>
+        </div>
 
-        <label for="rating">Minimum Rating:</label>
-        <select id="rating">
-            <option value="0">All</option>
-            <option value="3.5">3.5+</option>
-            <option value="4">4.0+</option>
-            <option value="4.5">4.5+</option>
-        </select>
+        <div class="flex items-center">
+            <label for="rating" class="font-semibold mr-2">Minimum Rating:</label>
+            <select id="rating" class="p-2 rounded bg-white text-gray-800">
+                <option value="0">All</option>
+                <option value="3.5">3.5+</option>
+                <option value="4">4.0+</option>
+                <option value="4.5">4.5+</option>
+            </select>
+        </div>
 
-        <button onclick="applyFilters()">Apply Filters</button>
+        <button onclick="applyFilters()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded shadow-lg transition duration-300">
+            Apply Filters
+        </button>
     </div>
 
-    <div id="info"></div>
-    <div id="map" style="height: 100vh; width: 60%; float: left;"></div>
-    <div id="restaurant-list" style="height: 100vh; width: 30%; float: right; overflow-y: auto; padding: 10px; border-left: 1px solid #ccc;"></div>
-
+    <div id="info" class="p-4"></div>
+    <div id="map" class="h-screen w-2/3 float-left border-r-2 border-gray-300"></div>
+    <div id="restaurant-list" class="h-screen w-1/3 float-right overflow-y-auto p-4 bg-white shadow-inner border-l-2 border-gray-300"></div>
 
     <script>
         let map;
         let infoWindow;
         let markers = [];  // Array to hold all markers
-
 
         function initMap() {
             // Initialize the map centered on Atlanta
@@ -86,12 +82,12 @@
 
             const request = {
                 location: location,
-                radius: radius, 
+                radius: radius,
                 types: ['restaurant', 'cafe', 'diner', 'bakery', 'brewery', 'bar'], // Fixed case issues
             };
 
             const service = new google.maps.places.PlacesService(map);
-            
+
             // Clear existing markers before adding new ones
             clearMarkers();
 
@@ -127,8 +123,6 @@
             });
         }
 
-
-
         function isCuisineMatch(place, cuisine) {
             const cuisineMap = {
                 mexican: ['mexican', 'taco'],
@@ -149,11 +143,10 @@
             }
 
             // Check if the place types match the selected cuisine
-            return cuisineMap[cuisine].some(keyword => 
+            return cuisineMap[cuisine].some(keyword =>
                 restaurantTypes.some(type => type.includes(keyword))
             );
         }
-
 
         function applyFilters() {
             const radius = document.getElementById('radius').value;
@@ -165,7 +158,6 @@
             // Refresh the map with new filters
             searchNearbyPlaces(map.getCenter());
         }
-
 
         function createMarker(place) {
             const marker = new google.maps.Marker({
@@ -179,13 +171,13 @@
             const restaurantListDiv = document.getElementById('restaurant-list');
             const listItem = document.createElement('div');
             listItem.style.cursor = 'pointer';
-            listItem.classList.add('restaurant-item');
+            listItem.classList.add('restaurant-item', 'bg-white', 'p-4', 'mb-4', 'rounded-lg', 'shadow-md', 'hover:bg-blue-50', 'transition', 'duration-200');
             listItem.innerHTML = `
-                <h3>${place.name}</h3>
-                <p>Rating: ${place.rating || 'N/A'}</p>
-                <div class="restaurant-details" style="display: none;">
+                <h3 class="text-xl font-semibold text-blue-600">${place.name}</h3>
+                <p class="text-gray-700 mb-2">Rating: <span class="text-yellow-500 font-bold">${place.rating || 'N/A'}</span></p>
+                <div class="restaurant-details text-sm text-gray-600 mt-2 hidden">
                     <p>Address: ${place.vicinity || 'N/A'}</p>
-                    <p>Price Level: ${place.price_level || 'N/A'}</p>
+                    <p>Price Level: ${place.price_level ? '$'.repeat(place.price_level) : 'N/A'}</p>
                 </div>
             `;
             restaurantListDiv.appendChild(listItem);
@@ -218,25 +210,22 @@
 
                         // Update the info section with restaurant details (if needed)
                         document.getElementById('info').innerHTML = `
-                            <h2>${details.name}</h2>
-                            <p>Cuisine: ${getCuisineType(details)}</p>
-                            <p>${details.formatted_address}</p>
-                            <p>Rating: ${details.rating}</p>
-                            <p>${details.formatted_phone_number || 'Phone number not available'}</p>
+                            <h2 class="text-2xl font-bold text-blue-600">${details.name}</h2>
+                            <p class="text-gray-800">Cuisine: ${getCuisineType(details)}</p>
+                            <p class="text-gray-600">${details.formatted_address}</p>
+                            <p class="text-gray-800">Rating: ${details.rating}</p>
+                            <p class="text-gray-600">${details.formatted_phone_number || 'Phone number not available'}</p>
                         `;
                     }
                 });
             });
         }
 
-        // Function to highlight the list item and remove highlight from others
         function highlightItem(item) {
             const allItems = document.querySelectorAll('.restaurant-item');
             allItems.forEach(el => el.classList.remove('highlight'));  // Remove highlight from all
             item.classList.add('highlight');  // Add highlight to the clicked one
         }
-
-
 
         function clearMarkers() {
             for (let i = 0; i < markers.length; i++) {
@@ -248,7 +237,6 @@
             const restaurantListDiv = document.getElementById('restaurant-list');
             restaurantListDiv.innerHTML = '';  // Clear the list
         }
-
 
         function getCuisineType(details) {
             const cuisineMap = {
@@ -297,7 +285,6 @@
             selectedBlock.querySelector('.restaurant-details').classList.add('show');
         }
 
-        // Add this function to handle when a marker is clicked
         function onMarkerClick(restaurantId) {
             // Highlight the corresponding restaurant block in the sidebar
             highlightRestaurant(restaurantId);
