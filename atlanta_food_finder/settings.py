@@ -28,6 +28,7 @@ ALLOWED_HOSTS = []
 
 GOOGLE_API_KEY = 'AIzaSyDe39jHRou9FyAwtXDmqtMG2WglTXs7IkA'
 
+# LOGOUT_REDIRECT_URL = '/logged_out/'
 
 # Application definition
 

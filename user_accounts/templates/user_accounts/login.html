@@ -1,15 +1,41 @@
 {% extends "user_accounts/base_generic.html" %}
 
 {% block content %}
-    <h2>Login</h2>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Login</button>
-    </form>
-    <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <div class="max-w-md w-full bg-white shadow-md rounded-lg p-8">
+        <h2 class="text-3xl font-bold text-center text-blue-600">Login</h2>
+        
+        <form method="POST" class="space-y-6 mt-6">
+            {% csrf_token %}
+            <div class="space-y-4">
+                <!-- Username Field -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Username</label>
+                    {{ form.username }}
+                </div>
+                
+                <!-- Password Field -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Password</label>
+                    {{ form.password }}
+                </div>
+            </div>
 
+            <div class="flex items-center justify-between">
+                <a href="{% url 'password_reset' %}" class="text-sm text-blue-600 hover:underline">Forgot Password?</a>
+            </div>
 
-    <p><a href="{% url 'password_reset' %}">Forgot your password?</a></p>
+            <!-- Submit Button -->
+            <div>
+                <button type="submit"
+                    class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Login</button>
+            </div>
+        </form>
 
+        <p class="text-center text-sm text-gray-500 mt-4">
+            Don’t have an account? 
+            <a href="{% url 'register' %}" class="text-blue-600 hover:underline">Register here</a>
+        </p>
+    </div>
+</div>
 {% endblock %}
