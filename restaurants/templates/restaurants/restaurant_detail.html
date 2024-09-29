@@ -1,0 +1,56 @@
+<!-- restaurant_detail.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ restaurant_name }} - Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .scrollable-reviews {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-4xl font-bold text-blue-600 mb-4">{{ restaurant_name }}</h1>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-lg mb-4">{{ details.description }}</p>
+            <p><strong>Rating:</strong> {{ details.rating }}</p>
+            <p><strong>Price Level:</strong> {{ details.price_level }}</p>
+
+            <p><strong>Opening Hours:</strong></p>
+            <ul class="list-disc pl-5">
+                {% for hour in details.opening_hours %}
+                    <li>{{ hour }}</li>
+                {% empty %}
+                    <li>Opening hours not available.</li>
+                {% endfor %}
+            </ul>
+
+            <h2 class="text-2xl font-semibold mt-6 mb-2">Reviews:</h2>
+            <div class="scrollable-reviews">
+                {% if details.reviews %}
+                    <ul class="space-y-4">
+                        {% for review in details.reviews %}
+                            <li class="bg-gray-100 p-4 rounded">
+                                <p class="font-bold">{{ review.author_name }}</p>
+                                <p class="text-yellow-500">Rating: {{ review.rating }}</p>
+                                <p class="italic">"{{ review.text }}"</p>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No reviews available.</p>
+                {% endif %}
+            </div>
+        </div>
+        <a href="/restaurants/map/" class="mt-6 inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded shadow transition duration-300">
+            Back to Map
+        </a>
+    </div>
+</body>
+</html>

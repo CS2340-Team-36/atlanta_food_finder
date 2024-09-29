@@ -173,8 +173,10 @@
                 <div class="restaurant-details text-sm text-gray-600 mt-2 hidden">
                     <p>Address: ${place.vicinity || 'N/A'}</p>
                     <p>Price Level: ${place.price_level ? '$'.repeat(place.price_level) : 'N/A'}</p>
+                    <button class="mt-2 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition duration-300 see-more-btn">See more</button>
                 </div>
             `;
+
             restaurantListDiv.appendChild(listItem);
 
             listItem.addEventListener('click', function () {
@@ -196,6 +198,13 @@
 
             google.maps.event.addListener(marker, 'click', () => {
                 onMarkerClick(place.place_id);
+            });
+
+            // Make sure the redirection path matches your Django setup
+            listItem.querySelector('.see-more-btn').addEventListener('click', () => {
+                const formattedName = place.name.replace(/\s+/g, '-').toLowerCase();
+                // Adjust the URL path if needed
+                window.location.href = `/restaurants/${formattedName}/`;
             });
         }
 
