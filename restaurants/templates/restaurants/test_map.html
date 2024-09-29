@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Map</title>
+    <style>
+      #map {
+        height: 400px;
+        width: 100%;
+      }
+    </style>
+    <!-- Use your client-side API key here -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWRTdA3dHlteX6bWA_w0MX0M0PBxAsd34&callback=initMap" async defer></script>
+</head>
+<body>
+    <h3>My Google Map Test</h3>
+    <div id="map"></div>
+    <script>
+      function initMap() {
+        var location = {lat: 33.7490, lng: -84.3880}; // Coordinates for Atlanta, GA
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 12,
+          center: location
+        });
+        var marker = new google.maps.Marker({
+          position: location,
+          map: map
+        });
+      }
+    </script>
+</body>
+</html>
