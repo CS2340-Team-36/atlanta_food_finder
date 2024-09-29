@@ -7,7 +7,15 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 text-gray-900">
-    <h1 class="text-3xl font-bold text-center text-blue-600 mt-6 mb-4">Restaurant Map</h1>
+    <!-- Top Section with Centered Title and Right-Aligned Button -->
+    <div class="flex justify-between items-center bg-white shadow p-4">
+        <!-- Placeholder to keep title centered -->
+        <div class="w-24"></div>
+        <h1 class="text-2xl font-bold text-blue-600 text-center">Restaurant Map</h1>
+        <button onclick="viewFavorites()" class="bg-green-500 text-white font-bold py-2 px-4 rounded shadow-lg hover:bg-green-600 transition duration-300">
+            View Favorites
+        </button>
+    </div>
 
     <!-- Filter Bar -->
     <div id="filter-bar" class="bg-blue-500 text-white p-4 flex justify-around items-center shadow-md">
@@ -58,11 +66,23 @@
         Added to favorites
     </div>
 
+    <!-- Favorites Modal -->
+    <div id="favoritesModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 class="text-xl font-bold mb-4">Your Favorite Restaurants</h2>
+            <ul id="favoritesList" class="list-disc list-inside"></ul>
+            <button onclick="closeFavorites()" class="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition duration-300">
+                Close
+            </button>
+        </div>
+    </div>
+
     <script>
         let map;
         let infoWindow;
         let markers = [];
         let placesById = {};
+        let favorites = [];
 
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
@@ -190,8 +210,10 @@
                 event.stopPropagation();
                 const isFavorite = star.classList.toggle('text-yellow-500');
                 if (isFavorite) {
+                    favorites.push(place);
                     showNotification('Added to favorites', 'bg-green-500');
                 } else {
+                    favorites = favorites.filter(fav => fav.place_id !== place.place_id);
                     showNotification('Removed from favorites', 'bg-red-500');
                 }
             });
@@ -200,10 +222,8 @@
                 onMarkerClick(place.place_id);
             });
 
-            // Make sure the redirection path matches your Django setup
             listItem.querySelector('.see-more-btn').addEventListener('click', () => {
                 const formattedName = place.name.replace(/\s+/g, '-').toLowerCase();
-                // Adjust the URL path if needed
                 window.location.href = `/restaurants/${formattedName}/`;
             });
         }
@@ -250,6 +270,32 @@
             setTimeout(() => {
                 notification.classList.remove('opacity-100');
             }, 2000);
+        }
+
+        function viewFavorites() {
+            const modal = document.getElementById('favoritesModal');
+            const favoritesList = document.getElementById('favoritesList');
+            favoritesList.innerHTML = ''; // Clear the list first
+
+            if (favorites.length === 0) {
+                favoritesList.innerHTML = '<li class="text-gray-500">No favorites added yet.</li>';
+            } else {
+                favorites.forEach(favorite => {
+                    const formattedName = favorite.name.replace(/\s+/g, '-').toLowerCase();
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `<a href="/restaurants/${formattedName}" class="text-blue-600 hover:underline">${favorite.name}</a>`;
+                    favoritesList.appendChild(listItem);
+                });
+            }
+
+            modal.classList.remove('pointer-events-none', 'opacity-0');
+            modal.classList.add('opacity-100');
+        }
+
+        function closeFavorites() {
+            const modal = document.getElementById('favoritesModal');
+            modal.classList.add('pointer-events-none', 'opacity-0');
+            modal.classList.remove('opacity-100');
         }
     </script>
 
