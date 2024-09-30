@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -30,6 +29,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+GOOGLE_API_KEY = 'AIzaSyDe39jHRou9FyAwtXDmqtMG2WglTXs7IkA'
+
+# LOGOUT_REDIRECT_URL = '/logged_out/'
 
 # Application definition
 
@@ -41,6 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'restaurants',
+    'restaurant_details',
+    'user_accounts'
+
 ]
 
 MIDDLEWARE = [
@@ -125,3 +130,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'team362340@gmail.com'
+EMAIL_HOST_PASSWORD = 'Group36@123'

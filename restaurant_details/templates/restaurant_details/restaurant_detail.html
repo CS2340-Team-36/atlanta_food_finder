@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ restaurant.name }} - Details</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <div class="card">
+        <div class="card-header text-center">
+          <h1>{{ restaurant.name }}</h1>
+        </div>
+        <div class="card-body">
+          <p><strong>Address:</strong> {{ restaurant.formatted_address }}</p>
+          <p><strong>Phone:</strong> {{ restaurant.formatted_phone_number }}</p>
+          <p><strong>Rating:</strong> {{ restaurant.rating }} / 5</p>
+          <p>
+            <strong>Website:</strong>
+            <a href="{{ restaurant.website }}" target="_blank"
+              >{{ restaurant.website }}</a
+            >
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <h2>Reviews</h2>
+        <ul class="list-group">
+          {% for review in restaurant.reviews %}
+          <li class="list-group-item">
+            <strong>{{ review.author_name }}</strong>
+            <span>(Rating: {{ review.rating }} / 5)</span><br />
+            <p>{{ review.text }}</p>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <a href="{% url 'restaurant_search' %}" class="btn btn-secondary mt-3"
+        >Back to Search</a
+      >
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>
