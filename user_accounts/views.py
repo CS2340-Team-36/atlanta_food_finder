@@ -15,7 +15,7 @@ def register(request):
             password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=password)
             login(request, user)
-            return redirect ('home')
+            return redirect ('restaurant_map')
     else:
         form = UserRegisterForm()
     return render(request, 'user_accounts/register.html', {'form': form})
@@ -29,7 +29,7 @@ def login_view(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('home')
+                return redirect('restaurant_map')
             
     else:
         form = AuthenticationForm()
