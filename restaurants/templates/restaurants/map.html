@@ -108,6 +108,10 @@
                 types: ['restaurant', 'cafe', 'diner', 'bakery', 'brewery', 'bar'],
             };
 
+            if (cuisine) {
+                request.keyword = cuisine
+            }
+
             const service = new google.maps.places.PlacesService(map);
 
             clearMarkers();
@@ -118,9 +122,9 @@
                         if (place.rating && place.rating < minRating) {
                             return false;
                         }
-                        if (cuisine && !isCuisineMatch(place, cuisine)) {
-                            return false;
-                        }
+                        // if (cuisine && !isCuisineMatch(place, cuisine)) {
+                        //     return false;
+                        // }
                         return true;
                     });
 
@@ -138,28 +142,28 @@
             });
         }
 
-        function isCuisineMatch(place, cuisine) {
-            const cuisineMap = {
-                mexican: ['mexican', 'taco'],
-                indian: ['indian', 'naan'],
-                chinese: ['noodle', 'chinese'],
-                italian: ['italian', 'pizza'],
-                american: ['burger', 'bbq', 'steak', 'diner', 'fast_food'],
-                thai: ['thai'],
-                japanese: ['japanese', 'sushi'],
-            };
+        // function isCuisineMatch(place, cuisine) {
+        //     const cuisineMap = {
+        //         mexican: ['mexican', 'taco'],
+        //         indian: ['indian', 'naan'],
+        //         chinese: ['noodle', 'chinese'],
+        //         italian: ['italian', 'pizza'],
+        //         american: ['burger', 'bbq', 'steak', 'diner', 'fast_food'],
+        //         thai: ['thai'],
+        //         japanese: ['japanese', 'sushi'],
+        //     };
 
-            const restaurantTypes = place.types || [];
-            const restaurantName = place.name ? place.name.toLowerCase() : '';
+        //     const restaurantTypes = place.types || [];
+        //     const restaurantName = place.name ? place.name.toLowerCase() : '';
 
-            if (cuisineMap[cuisine].some(keyword => restaurantName.includes(keyword))) {
-                return true;
-            }
+        //     if (cuisineMap[cuisine].some(keyword => restaurantName.includes(keyword))) {
+        //         return true;
+        //     }
 
-            return cuisineMap[cuisine].some(keyword =>
-                restaurantTypes.some(type => type.includes(keyword))
-            );
-        }
+        //     return cuisineMap[cuisine].some(keyword =>
+        //         restaurantTypes.some(type => type.includes(keyword))
+        //     );
+        // }
 
         function applyFilters() {
             const radius = document.getElementById('radius').value;
