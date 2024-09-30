@@ -1,6 +1,5 @@
-import json
 import requests
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.conf import settings
 from .models import Restaurant
 
@@ -12,13 +11,10 @@ def restaurant_map(request):
 
 
 def restaurant_detail(request, restaurant_name):
-    # Replace dashes with spaces and capitalize each word
     formatted_name = restaurant_name.replace("-", " ").title()
 
-    # Use the server-side API key from settings
     api_key = settings.GOOGLE_MAPS_API_KEY_SERVER
 
-    # Search for the place using Place Search API
     place_search_url = (
         "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
     )
@@ -35,7 +31,6 @@ def restaurant_detail(request, restaurant_name):
     if search_data.get("candidates"):
         place_id = search_data["candidates"][0]["place_id"]
 
-        # Get place details using Place Details API
         place_details_url = "https://maps.googleapis.com/maps/api/place/details/json"
         details_params = {
             "place_id": place_id,
@@ -49,11 +44,9 @@ def restaurant_detail(request, restaurant_name):
         if details_data.get("result"):
             details = details_data["result"]
 
-            # Extract latitude and longitude
             latitude = details.get("geometry", {}).get("location", {}).get("lat")
             longitude = details.get("geometry", {}).get("location", {}).get("lng")
 
-            # Debugging: Print latitude and longitude
             print("Latitude:", latitude)
             print("Longitude:", longitude)
 
