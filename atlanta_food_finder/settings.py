@@ -21,6 +21,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-c9q_vo^kr@m$i!k$e+ynbj1hakz$($5s@k$_^iv8-79h3*pzz+'
 
+GOOGLE_MAPS_API_KEY_SERVER = 'AIzaSyDe39jHRou9FyAwtXDmqtMG2WglTXs7IkA'
+GOOGLE_MAPS_API_KEY_CLIENT = 'AIzaSyBWRTdA3dHlteX6bWA_w0MX0M0PBxAsd34'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -39,8 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'restaurants',
     'restaurant_details',
     'user_accounts'
+
 ]
 
 MIDDLEWARE = [
