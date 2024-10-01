@@ -3,15 +3,17 @@ from django.shortcuts import render
 from django.conf import settings
 from .models import Restaurant
 from django.http import JsonResponse
+from .models import Restaurant, Favorite
 from django.contrib.auth.decorators import login_required
-from .models import FavoriteRestaurant
+import json
 
+@login_required
 def restaurant_map(request):
     restaurants = Restaurant.objects.all()
     context = {"restaurants": restaurants}
     return render(request, "restaurants/map.html", context)
 
-
+@login_required
 def restaurant_detail(request, restaurant_name):
     formatted_name = restaurant_name.replace("-", " ").title()
 
@@ -100,34 +102,59 @@ def restaurant_detail(request, restaurant_name):
 
     return render(request, "restaurants/restaurant_detail.html", context)
 
-@login_required
+
+def ajax_login_required(function):
+    def wrap(request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return function(request, *args, **kwargs)
+        else:
+            return JsonResponse({'error': 'You must be logged in to perform this action.'}, status=401)
+    return wrap
+
+@ajax_login_required
 def toggle_favorite(request):
     if request.method == 'POST':
-        restaurant_name = request.POST.get('restaurant_name')
-        restaurant_place_id = request.POST.get('place_id')
+        data = json.loads(request.body)
+        restaurant_name = data.get('restaurant_name')
+        place_id = data.get('place_id')
 
-        # Check if the restaurant is already in the user's favorites
-        favorite, created = FavoriteRestaurant.objects.get_or_create(
-            user=request.user,
-            restaurant_place_id=restaurant_place_id,
+        user = request.user
+
+        favorite, created = Favorite.objects.get_or_create(
+            user=user,
+            restaurant_place_id=place_id,
             defaults={'restaurant_name': restaurant_name}
         )
 
         if not created:
-            # If it's already favorited, unfavorite it (delete)
+            # Favorite already exists, so remove it
             favorite.delete()
             favorited = False
         else:
-            # If it's newly favorited, add it
+            # Favorite was created
             favorited = True
 
-        # Return the current status (favorited/unfavorited) and the updated favorites list
-        favorites = list(FavoriteRestaurant.objects.filter(user=request.user).values_list('restaurant_name', flat=True))
+        # Return the updated list of favorites
+        favorites = Favorite.objects.filter(user=user)
+        favorites_list = [{
+            'restaurant_name': fav.restaurant_name,
+            'restaurant_place_id': fav.restaurant_place_id
+        } for fav in favorites]
 
-        return JsonResponse({'favorited': favorited, 'favorites': favorites})
+        return JsonResponse({'favorited': favorited, 'favorites': favorites_list})
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-@login_required
+@ajax_login_required
 def get_favorites(request):
     if request.method == 'GET':
-        favorites = list(FavoriteRestaurant.objects.filter(user=request.user).values('restaurant_name', 'restaurant_place_id'))
-        return JsonResponse({'favorites': favorites})
+        user = request.user
+        favorites = Favorite.objects.filter(user=user)
+        favorites_list = [{
+            'restaurant_name': fav.restaurant_name,
+            'restaurant_place_id': fav.restaurant_place_id
+        } for fav in favorites]
+
+        return JsonResponse({'favorites': favorites_list})
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)

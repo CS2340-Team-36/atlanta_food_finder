@@ -7,6 +7,10 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 text-gray-900">
+    <form style="display: none;">
+        {% csrf_token %}
+    </form>
+    
     <!-- Top Section with Centered Title and Right-Aligned Button -->
     <div class="flex justify-between items-center bg-white shadow p-4">
         <!-- Placeholder to keep title centered -->
@@ -86,7 +90,8 @@
         let markers = [];
         let placesById = {};
         let favorites = [];
-
+        let favoritePlaceIds = new Set();
+        
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 center: { lat: 33.7490, lng: -84.3880 },
@@ -181,6 +186,11 @@
                 </div>
             `;
 
+            const star = listItem.querySelector('.star');
+            if (favoritePlaceIds.has(place.place_id)) {
+                star.classList.add('text-yellow-500');  // Mark as favorite
+            }
+
             restaurantListDiv.appendChild(listItem);
 
             listItem.addEventListener('click', function () {
@@ -189,12 +199,12 @@
                 highlightItem(listItem);
             });
 
-            const star = listItem.querySelector('.star');
-            star.addEventListener('click', function (event) {
-                event.stopPropagation();
-                const isFavorite = star.classList.toggle('text-yellow-500');
-                toggleFavorite(place.name, place.place_id);  // Call the toggle function
-            });
+            // const star = listItem.querySelector('.star');
+            // star.addEventListener('click', function (event) {
+            //     event.stopPropagation();
+            //     const isFavorite = star.classList.toggle('text-yellow-500');
+            //     toggleFavorite(place.name, place.place_id);  // Call the toggle function
+            // });
 
             google.maps.event.addListener(marker, 'click', () => {
                 onMarkerClick(place.place_id);
@@ -204,6 +214,42 @@
                 const formattedName = place.name.replace(/\s+/g, '-').toLowerCase();
                 window.location.href = `/restaurants/${formattedName}/`;
             });
+
+            star.addEventListener('click', function (event) {
+                event.stopPropagation();
+                const isFavorite = star.classList.toggle('text-yellow-500');
+                toggleFavorite(place.name, place.place_id);
+            });
+
+        }
+
+        function toggleFavorite(restaurantName, placeId) {
+            fetch('/restaurants/toggle-favorite/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')  // CSRF token
+                },
+                body: JSON.stringify({
+                    'restaurant_name': restaurantName,
+                    'place_id': placeId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Favorite response:', data);
+
+                if (data.favorited) {
+                    showNotification('Added to favorites', 'bg-green-500');
+                } else {
+                    showNotification('Removed from favorites', 'bg-red-500');
+                }
+
+                favorites = data.favorites;  // Update the favorites list
+                favoritePlaceIds = new Set(favorites.map(fav => fav.restaurant_place_id));
+                console.log('Updated favorites list:', favorites);
+            })
+            .catch(error => console.error('Error:', error));
         }
 
         function onMarkerClick(placeId) {
@@ -245,37 +291,6 @@
             window.location.href = "{% url 'logout' %}"
         }
 
-        // Check if toggleFavorite is called
-        function toggleFavorite(restaurantName, placeId) {
-            console.log(`Toggling favorite for: ${restaurantName} (${placeId})`);
-
-            fetch('/restaurants/toggle-favorite/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')  // CSRF token
-                },
-                body: JSON.stringify({
-                    'restaurant_name': restaurantName,
-                    'place_id': placeId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Favorite response:', data);  // Log the response for debugging
-
-                if (data.favorited) {
-                    showNotification('Added to favorites', 'bg-green-500');
-                } else {
-                    showNotification('Removed from favorites', 'bg-red-500');
-                }
-
-                favorites = data.favorites;  // Update the favorites list
-                console.log('Updated favorites list:', favorites);
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
 
         function loadFavorites() {
             fetch('/restaurants/get-favorites/', {
@@ -288,6 +303,9 @@
             .then(data => {
                 favorites = data.favorites;  // Load favorites from the server
                 console.log('Loaded favorites:', favorites);
+
+                // Populate favoritePlaceIds Set
+                favoritePlaceIds = new Set(favorites.map(fav => fav.restaurant_place_id));
 
                 // Mark favorite restaurants on the map or list
                 favorites.forEach(fav => {
@@ -344,14 +362,14 @@
             modal.classList.add('pointer-events-none', 'opacity-0');
             modal.classList.remove('opacity-100');
         }
-
-        // Utility function to get CSRF token from cookies
+        
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
                 const cookies = document.cookie.split(';');
                 for (let i = 0; i < cookies.length; i++) {
                     const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
                     if (cookie.substring(0, name.length + 1) === (name + '=')) {
                         cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                         break;
@@ -360,6 +378,7 @@
             }
             return cookieValue;
         }
+
     </script>
 
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDe39jHRou9FyAwtXDmqtMG2WglTXs7IkA&libraries=places&callback=initMap"></script>
