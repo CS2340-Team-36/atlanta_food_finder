@@ -6,12 +6,13 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import FavoriteRestaurant
 
+@login_required
 def restaurant_map(request):
     restaurants = Restaurant.objects.all()
     context = {"restaurants": restaurants}
     return render(request, "restaurants/map.html", context)
 
-
+@login_required
 def restaurant_detail(request, restaurant_name):
     formatted_name = restaurant_name.replace("-", " ").title()
 
