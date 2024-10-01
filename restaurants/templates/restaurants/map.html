@@ -7,361 +7,346 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 text-gray-900">
-    <!-- Top Section with Centered Title and Right-Aligned Button -->
-    <div class="flex justify-between items-center bg-white shadow p-4">
-        <!-- Placeholder to keep title centered -->
-        <div class="w-24"></div>
-        <h1 class="text-2xl font-bold text-blue-600 text-center">Restaurant Map</h1>
+<!-- Top Section with Centered Title and Right-Aligned Buttons -->
+<div class="flex justify-between items-center bg-white shadow p-4">
+    <h1 class="text-2xl font-bold text-blue-600 text-center w-full">Restaurant Map</h1>
+    <div class="flex space-x-4">
         <button onclick="viewFavorites()" class="bg-green-500 text-white font-bold py-2 px-4 rounded shadow-lg hover:bg-green-600 transition duration-300">
             View Favorites
         </button>
         <button onclick="logout()" class="bg-red-500 text-white font-bold py-2 px-4 rounded shadow-lg hover:bg-red-600 transition duration-300">
-                Logout
+            Logout
         </button>
     </div>
+</div>
 
-    <!-- Filter Bar -->
-    <div id="filter-bar" class="bg-blue-500 text-white p-4 flex justify-around items-center shadow-md">
-        <div class="flex items-center">
-            <label for="radius" class="font-semibold mr-2">Radius:</label>
-            <select id="radius" class="p-2 rounded bg-white text-gray-800">
-                <option value="8047">5 miles</option>
-                <option value="16094">10 miles</option>
-                <option value="32187">20 miles</option>
-            </select>
-        </div>
+<!-- Filter Bar with Search and Clear Filters Button -->
+<div id="filter-bar" class="bg-blue-500 text-white p-4 flex justify-around items-center shadow-md">
+    <!-- Radius Filter -->
+    <div class="flex items-center">
+        <label for="radius" class="font-semibold mr-2">Radius:</label>
+        <select id="radius" class="p-2 rounded bg-white text-gray-800">
+            <option value="8047">5 miles</option>
+            <option value="16094">10 miles</option>
+            <option value="32187">20 miles</option>
+        </select>
+    </div>
 
-        <div class="flex items-center">
-            <label for="cuisine" class="font-semibold mr-2">Cuisine:</label>
-            <select id="cuisine" class="p-2 rounded bg-white text-gray-800">
-                <option value="">All</option>
-                <option value="mexican">Mexican</option>
-                <option value="indian">Indian</option>
-                <option value="chinese">Chinese</option>
-                <option value="italian">Italian</option>
-                <option value="american">American</option>
-                <option value="thai">Thai</option>
-                <option value="japanese">Japanese</option>
-            </select>
-        </div>
+    <!-- Cuisine Filter -->
+    <div class="flex items-center">
+        <label for="cuisine" class="font-semibold mr-2">Cuisine:</label>
+        <select id="cuisine" class="p-2 rounded bg-white text-gray-800">
+            <option value="">All</option>
+            <option value="mexican">Mexican</option>
+            <option value="indian">Indian</option>
+            <option value="chinese">Chinese</option>
+            <option value="italian">Italian</option>
+            <option value="american">American</option>
+            <option value="thai">Thai</option>
+            <option value="japanese">Japanese</option>
+        </select>
+    </div>
 
-        <div class="flex items-center">
-            <label for="rating" class="font-semibold mr-2">Minimum Rating:</label>
-            <select id="rating" class="p-2 rounded bg-white text-gray-800">
-                <option value="0">All</option>
-                <option value="3.5">3.5+</option>
-                <option value="4">4.0+</option>
-                <option value="4.5">4.5+</option>
-            </select>
-        </div>
+    <!-- Rating Filter -->
+    <div class="flex items-center">
+        <label for="rating" class="font-semibold mr-2">Minimum Rating:</label>
+        <select id="rating" class="p-2 rounded bg-white text-gray-800">
+            <option value="0">All</option>
+            <option value="3.5">3.5+</option>
+            <option value="4">4.0+</option>
+            <option value="4.5">4.5+</option>
+        </select>
+    </div>
 
+    <!-- Search Bar for Restaurant Name -->
+    <div class="flex items-center">
+        <label for="search" class="font-semibold mr-2">Search:</label>
+        <input id="search" type="text" class="p-2 rounded bg-white text-gray-800" placeholder="Enter restaurant name" />
+    </div>
+
+    <div class="flex space-x-4">
+        <!-- Apply Filters Button -->
         <button onclick="applyFilters()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded shadow-lg transition duration-300">
             Apply Filters
         </button>
+
+        <!-- Clear Filters Button -->
+        <button onclick="clearFilters()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded shadow-lg transition duration-300">
+            Clear Filters
+        </button>
     </div>
+</div>
 
-    <div id="info" class="p-4"></div>
-    <div id="map" class="h-screen w-2/3 float-left border-r-2 border-gray-300"></div>
-    <div id="restaurant-list" class="h-screen w-1/3 float-right overflow-y-auto p-4 bg-white shadow-inner border-l-2 border-gray-300"></div>
+<div id="info" class="p-4"></div>
+<div id="map" class="h-screen w-2/3 float-left border-r-2 border-gray-300"></div>
+<div id="restaurant-list" class="h-screen w-1/3 float-right overflow-y-auto p-4 bg-white shadow-inner border-l-2 border-gray-300"></div>
 
-    <!-- Notification Message -->
-    <div id="notification" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 text-white px-4 py-2 rounded shadow-lg opacity-0 transition-opacity duration-500">
-        Added to favorites
+<!-- Notification Message -->
+<div id="notification" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 text-white px-4 py-2 rounded shadow-lg opacity-0 transition-opacity duration-500">
+    Added to favorites
+</div>
+
+<!-- Favorites Modal -->
+<div id="favoritesModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+        <h2 class="text-xl font-bold mb-4">Your Favorite Restaurants</h2>
+        <ul id="favoritesList" class="list-disc list-inside"></ul>
+        <button onclick="closeFavorites()" class="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition duration-300">
+            Close
+        </button>
     </div>
+</div>
 
-    <!-- Favorites Modal -->
-    <div id="favoritesModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h2 class="text-xl font-bold mb-4">Your Favorite Restaurants</h2>
-            <ul id="favoritesList" class="list-disc list-inside"></ul>
-            <button onclick="closeFavorites()" class="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition duration-300">
-                Close
-            </button>
-        </div>
-    </div>
+<script>
+    let map;
+    let infoWindow;
+    let markers = [];
+    let placesById = {};
+    let favorites = [];
 
-    <script>
-        let map;
-        let infoWindow;
-        let markers = [];
-        let placesById = {};
-        let favorites = [];
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: 33.7490, lng: -84.3880 },
+            zoom: 12,
+        });
 
-        function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: 33.7490, lng: -84.3880 },
-                zoom: 12,
-            });
+        infoWindow = new google.maps.InfoWindow();
 
-            infoWindow = new google.maps.InfoWindow();
-
-            // Load user's favorites on page load
-            loadFavorites();
-
-            map.addListener('idle', () => {
-                searchNearbyPlaces(map.getCenter());
-            });
-        }
-
-        function searchNearbyPlaces(location) {
-            const radius = document.getElementById('radius').value || '8047';
-            const cuisine = document.getElementById('cuisine').value;
-            const minRating = document.getElementById('rating').value || '0';
-
-            const request = {
-                location: location,
-                radius: radius,
-                types: ['restaurant', 'cafe', 'diner', 'bakery', 'brewery', 'bar'],
-            };
-
-            if (cuisine) {
-                request.keyword = cuisine
-            }
-
-            const service = new google.maps.places.PlacesService(map);
-
-            clearMarkers();
-
-            service.nearbySearch(request, (results, status, pagination) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    const filteredResults = results.filter(place => {
-                        if (place.rating && place.rating < minRating) {
-                            return false;
-                        }
-                        return true;
-                    });
-
-                    filteredResults.forEach(place => {
-                        placesById[place.place_id] = place;
-                        createMarker(place);
-                    });
-
-                    if (pagination && pagination.hasNextPage) {
-                        setTimeout(() => {
-                            pagination.nextPage();
-                        }, 2000);
-                    }
-                }
-            });
-        }
-
-        function applyFilters() {
-            const radius = document.getElementById('radius').value;
-            const cuisine = document.getElementById('cuisine').value;
-            const rating = document.getElementById('rating').value;
-
-            console.log(`Filters - Radius: ${radius}, Cuisine: ${cuisine}, Rating: ${rating}`);
-
+        map.addListener('idle', () => {
             searchNearbyPlaces(map.getCenter());
+        });
+    }
+
+    function searchNearbyPlaces(location, searchQuery = '') {
+        const radius = document.getElementById('radius').value || '8047';
+        const cuisine = document.getElementById('cuisine').value;
+        const minRating = document.getElementById('rating').value || '0';
+
+        const request = {
+            location: location,
+            radius: radius,
+            types: ['restaurant', 'cafe', 'diner', 'bakery', 'brewery', 'bar'],
+        };
+
+        if (cuisine) {
+            request.keyword = cuisine;
         }
 
-        function createMarker(place) {
-            const marker = new google.maps.Marker({
-                map: map,
-                position: place.geometry.location,
-            });
+        const service = new google.maps.places.PlacesService(map);
 
-            markers.push(marker);
+        clearMarkers();
 
-            const restaurantListDiv = document.getElementById('restaurant-list');
-            const listItem = document.createElement('div');
-            listItem.id = place.place_id;
-            listItem.style.cursor = 'pointer';
-            listItem.classList.add('restaurant-item', 'bg-white', 'p-4', 'mb-4', 'rounded-lg', 'shadow-md', 'hover:bg-blue-50', 'transition', 'duration-200');
-            listItem.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-semibold text-blue-600">${place.name}</h3>
-                    <span class="star text-gray-400 hover:text-yellow-500 transition-colors duration-300 text-2xl">&#9733;</span>
-                </div>
-                <p class="text-gray-700 mb-2">Rating: <span class="text-yellow-500 font-bold">${place.rating || 'N/A'}</span></p>
-                <div class="restaurant-details text-sm text-gray-600 mt-2 hidden">
-                    <p>Address: ${place.vicinity || 'N/A'}</p>
-                    <p>Price Level: ${place.price_level ? '$'.repeat(place.price_level) : 'N/A'}</p>
-                    <button class="mt-2 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition duration-300 see-more-btn">See more</button>
-                </div>
-            `;
-
-            restaurantListDiv.appendChild(listItem);
-
-            listItem.addEventListener('click', function () {
-                const details = listItem.querySelector('.restaurant-details');
-                details.style.display = details.style.display === 'none' ? 'block' : 'none';
-                highlightItem(listItem);
-            });
-
-            const star = listItem.querySelector('.star');
-            star.addEventListener('click', function (event) {
-                event.stopPropagation();
-                const isFavorite = star.classList.toggle('text-yellow-500');
-                toggleFavorite(place.name, place.place_id);  // Call the toggle function
-            });
-
-            google.maps.event.addListener(marker, 'click', () => {
-                onMarkerClick(place.place_id);
-            });
-
-            listItem.querySelector('.see-more-btn').addEventListener('click', () => {
-                const formattedName = place.name.replace(/\s+/g, '-').toLowerCase();
-                window.location.href = `/restaurants/${formattedName}/`;
-            });
-        }
-
-        function onMarkerClick(placeId) {
-            const place = placesById[placeId];
-            if (place) {
-                highlightRestaurant(placeId);
-            }
-        }
-
-        function highlightRestaurant(restaurantId) {
-            const restaurantListDiv = document.getElementById('restaurant-list');
-            const listItem = document.getElementById(restaurantId);
-
-            if (listItem) {
-                listItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                const details = listItem.querySelector('.restaurant-details');
-                details.style.display = 'block';
-                highlightItem(listItem);
-            }
-        }
-
-        function highlightItem(item) {
-            document.querySelectorAll('.restaurant-item').forEach(el => {
-                el.classList.remove('bg-blue-100');
-            });
-            item.classList.add('bg-blue-100');
-        }
-
-        function clearMarkers() {
-            markers.forEach(marker => marker.setMap(null));
-            markers = [];
-            const restaurantListDiv = document.getElementById('restaurant-list');
-            restaurantListDiv.innerHTML = '';
-        }
-
-        function logout() {
-            // Add your logout logic here, such as clearing authentication tokens and redirecting to the login page
-            console.log('User logged out');
-            window.location.href = "{% url 'logout' %}"
-        }
-
-        // Check if toggleFavorite is called
-        function toggleFavorite(restaurantName, placeId) {
-            console.log(`Toggling favorite for: ${restaurantName} (${placeId})`);
-
-            fetch('/restaurants/toggle-favorite/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')  // CSRF token
-                },
-                body: JSON.stringify({
-                    'restaurant_name': restaurantName,
-                    'place_id': placeId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Favorite response:', data);  // Log the response for debugging
-
-                if (data.favorited) {
-                    showNotification('Added to favorites', 'bg-green-500');
-                } else {
-                    showNotification('Removed from favorites', 'bg-red-500');
-                }
-
-                favorites = data.favorites;  // Update the favorites list
-                console.log('Updated favorites list:', favorites);
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-
-        function loadFavorites() {
-            fetch('/restaurants/get-favorites/', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                favorites = data.favorites;  // Load favorites from the server
-                console.log('Loaded favorites:', favorites);
-
-                // Mark favorite restaurants on the map or list
-                favorites.forEach(fav => {
-                    const listItem = document.getElementById(fav.restaurant_place_id);
-                    if (listItem) {
-                        const star = listItem.querySelector('.star');
-                        star.classList.add('text-yellow-500');  // Mark as favorite
+        service.nearbySearch(request, (results, status, pagination) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                const filteredResults = results.filter(place => {
+                    // Check minimum rating
+                    if (place.rating && place.rating < minRating) {
+                        return false;
                     }
+
+                    // Check if the search query matches the restaurant name (if searchQuery is provided)
+                    if (searchQuery && !place.name.toLowerCase().includes(searchQuery)) {
+                        return false;
+                    }
+
+                    return true;
                 });
-            })
-            .catch(error => console.error('Error loading favorites:', error));
-        }
+
+                filteredResults.forEach(place => {
+                    placesById[place.place_id] = place;
+                    createMarker(place);
+                });
+
+                if (pagination && pagination.hasNextPage) {
+                    setTimeout(() => {
+                        pagination.nextPage();
+                    }, 2000);
+                }
+            }
+        });
+    }
 
 
-        function showNotification(message, colorClass) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
+    function applyFilters() {
+        const radius = document.getElementById('radius').value;
+        const cuisine = document.getElementById('cuisine').value;
+        const rating = document.getElementById('rating').value;
+        const searchQuery = document.getElementById('search').value.toLowerCase();  // New search term
 
-            // Reset notification class and apply the new color class
-            notification.className = `fixed bottom-4 left-1/2 transform -translate-x-1/2 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-500 ${colorClass}`;
+        console.log(`Filters - Radius: ${radius}, Cuisine: ${cuisine}, Rating: ${rating}, Search: ${searchQuery}`);
 
-            // Set opacity to 1 (visible)
-            notification.style.opacity = '1';
+        // Call searchNearbyPlaces with map center and apply search by name
+        searchNearbyPlaces(map.getCenter(), searchQuery);
+    }
 
-            setTimeout(() => {
-                // Hide the notification after 2 seconds by setting opacity to 0
-                notification.style.opacity = '0';
-            }, 2000);
-        }
+    function clearFilters() {
+        // Reset all filters to default values
+        document.getElementById('radius').value = '8047';  // 5 miles default
+        document.getElementById('cuisine').value = '';     // All cuisines
+        document.getElementById('rating').value = '0';     // All ratings
+        document.getElementById('search').value = '';      // Clear search input
+
+        // Reapply the filters with default values
+        applyFilters();
+    }
 
 
-        function viewFavorites() {
-            const modal = document.getElementById('favoritesModal');
-            const favoritesList = document.getElementById('favoritesList');
-            favoritesList.innerHTML = ''; // Clear the list first
 
-            if (favorites.length === 0) {
-                favoritesList.innerHTML = '<li class="text-gray-500">No favorites added yet.</li>';
+    function createMarker(place) {
+        const marker = new google.maps.Marker({
+            map: map,
+            position: place.geometry.location,
+        });
+
+        markers.push(marker);
+
+        const restaurantListDiv = document.getElementById('restaurant-list');
+        const listItem = document.createElement('div');
+        listItem.id = place.place_id;
+        listItem.style.cursor = 'pointer';
+        listItem.classList.add('restaurant-item', 'bg-white', 'p-4', 'mb-4', 'rounded-lg', 'shadow-md', 'hover:bg-blue-50', 'transition', 'duration-200');
+        listItem.innerHTML = `
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-semibold text-blue-600">${place.name}</h3>
+                <span class="star text-gray-400 hover:text-yellow-500 transition-colors duration-300 text-2xl">&#9733;</span>
+            </div>
+            <p class="text-gray-700 mb-2">Rating: <span class="text-yellow-500 font-bold">${place.rating || 'N/A'}</span></p>
+            <div class="restaurant-details text-sm text-gray-600 mt-2 hidden">
+                <p>Address: ${place.vicinity || 'N/A'}</p>
+                <p>Price Level: ${place.price_level ? '$'.repeat(place.price_level) : 'N/A'}</p>
+                <button class="mt-2 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition duration-300 see-more-btn">See more</button>
+            </div>
+        `;
+
+        restaurantListDiv.appendChild(listItem);
+
+        listItem.addEventListener('click', function () {
+            const details = listItem.querySelector('.restaurant-details');
+            details.style.display = details.style.display === 'none' ? 'block' : 'none';
+            highlightItem(listItem);
+        });
+
+        const star = listItem.querySelector('.star');
+        star.addEventListener('click', function (event) {
+            event.stopPropagation();
+            const isFavorite = star.classList.toggle('text-yellow-500');
+
+            // Trigger notification based on favorite status
+            if (isFavorite) {
+                showNotification('Added to favorites', 'bg-green-500');
             } else {
-                favorites.forEach(favorite => {
-                    const formattedName = favorite.restaurant_name.replace(/\s+/g, '-').toLowerCase();
-                    const listItem = document.createElement('li');
-                    listItem.innerHTML = `<a href="/restaurants/${formattedName}" class="text-blue-600 hover:underline">${favorite.restaurant_name}</a>`;
-                    favoritesList.appendChild(listItem);
-                });
+                showNotification('Removed from favorites', 'bg-red-500');
             }
+        });
 
-            modal.classList.remove('pointer-events-none', 'opacity-0');
-            modal.classList.add('opacity-100');
+        google.maps.event.addListener(marker, 'click', () => {
+            onMarkerClick(place.place_id);
+        });
+
+        listItem.querySelector('.see-more-btn').addEventListener('click', () => {
+            const formattedName = place.name.replace(/\s+/g, '-').toLowerCase();
+            window.location.href = `/restaurants/${formattedName}/`;
+        });
+    }
+
+    function showNotification(message, colorClass) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+
+        // Reset notification class and apply the new color class
+        notification.className = `fixed bottom-4 left-1/2 transform -translate-x-1/2 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-500 ${colorClass}`;
+
+        // Set opacity to 1 (visible)
+        notification.style.opacity = '1';
+
+        setTimeout(() => {
+            // Hide the notification after 2 seconds by setting opacity to 0
+            notification.style.opacity = '0';
+        }, 2000);
+    }
+
+    function onMarkerClick(placeId) {
+        const place = placesById[placeId];
+        if (place) {
+            highlightRestaurant(placeId);
+        }
+    }
+
+    function highlightRestaurant(restaurantId) {
+        const restaurantListDiv = document.getElementById('restaurant-list');
+        const listItem = document.getElementById(restaurantId);
+
+        if (listItem) {
+            listItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const details = listItem.querySelector('.restaurant-details');
+            details.style.display = 'block';
+            highlightItem(listItem);
+        }
+    }
+
+    function highlightItem(item) {
+        document.querySelectorAll('.restaurant-item').forEach(el => {
+            el.classList.remove('bg-blue-100');
+        });
+        item.classList.add('bg-blue-100');
+    }
+
+    function clearMarkers() {
+        markers.forEach(marker => marker.setMap(null));
+        markers = [];
+        const restaurantListDiv = document.getElementById('restaurant-list');
+        restaurantListDiv.innerHTML = '';
+    }
+
+    function logout() {
+        // Add your logout logic here, such as clearing authentication tokens and redirecting to the login page
+        console.log('User logged out');
+        window.location.href = "{% url 'logout' %}"
+    }
+
+    function viewFavorites() {
+        const modal = document.getElementById('favoritesModal');
+        const favoritesList = document.getElementById('favoritesList');
+        favoritesList.innerHTML = ''; // Clear the list first
+
+        if (favorites.length === 0) {
+            favoritesList.innerHTML = '<li class="text-gray-500">No favorites added yet.</li>';
+        } else {
+            favorites.forEach(favorite => {
+                const formattedName = favorite.restaurant_name.replace(/\s+/g, '-').toLowerCase();
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `<a href="/restaurants/${formattedName}" class="text-blue-600 hover:underline">${favorite.restaurant_name}</a>`;
+                favoritesList.appendChild(listItem);
+            });
         }
 
-        function closeFavorites() {
-            const modal = document.getElementById('favoritesModal');
-            modal.classList.add('pointer-events-none', 'opacity-0');
-            modal.classList.remove('opacity-100');
-        }
+        modal.classList.remove('pointer-events-none', 'opacity-0');
+        modal.classList.add('opacity-100');
+    }
 
-        // Utility function to get CSRF token from cookies
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
+    function closeFavorites() {
+        const modal = document.getElementById('favoritesModal');
+        modal.classList.add('pointer-events-none', 'opacity-0');
+        modal.classList.remove('opacity-100');
+    }
+
+    // Utility function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
             }
-            return cookieValue;
         }
-    </script>
+        return cookieValue;
+    }
+</script>
 
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDe39jHRou9FyAwtXDmqtMG2WglTXs7IkA&libraries=places&callback=initMap"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDe39jHRou9FyAwtXDmqtMG2WglTXs7IkA&libraries=places&callback=initMap"></script>
 </body>
 </html>
