@@ -7,6 +7,7 @@ from .models import Restaurant, Favorite
 from django.contrib.auth.decorators import login_required
 import json
 
+
 @login_required
 def restaurant_map(request):
     restaurants = Restaurant.objects.all()

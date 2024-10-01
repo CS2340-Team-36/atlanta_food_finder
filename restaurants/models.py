@@ -9,7 +9,6 @@ class Restaurant(models.Model):
 
     def _str_(self):
         return self.name
-    
 
 class Favorite(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
