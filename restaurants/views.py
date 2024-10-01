@@ -2,7 +2,9 @@ import requests
 from django.shortcuts import render
 from django.conf import settings
 from .models import Restaurant
-
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import FavoriteRestaurant
 
 def restaurant_map(request):
     restaurants = Restaurant.objects.all()
@@ -97,3 +99,35 @@ def restaurant_detail(request, restaurant_name):
         }
 
     return render(request, "restaurants/restaurant_detail.html", context)
+
+@login_required
+def toggle_favorite(request):
+    if request.method == 'POST':
+        restaurant_name = request.POST.get('restaurant_name')
+        restaurant_place_id = request.POST.get('place_id')
+
+        # Check if the restaurant is already in the user's favorites
+        favorite, created = FavoriteRestaurant.objects.get_or_create(
+            user=request.user,
+            restaurant_place_id=restaurant_place_id,
+            defaults={'restaurant_name': restaurant_name}
+        )
+
+        if not created:
+            # If it's already favorited, unfavorite it (delete)
+            favorite.delete()
+            favorited = False
+        else:
+            # If it's newly favorited, add it
+            favorited = True
+
+        # Return the current status (favorited/unfavorited) and the updated favorites list
+        favorites = list(FavoriteRestaurant.objects.filter(user=request.user).values_list('restaurant_name', flat=True))
+
+        return JsonResponse({'favorited': favorited, 'favorites': favorites})
+
+@login_required
+def get_favorites(request):
+    if request.method == 'GET':
+        favorites = list(FavoriteRestaurant.objects.filter(user=request.user).values('restaurant_name', 'restaurant_place_id'))
+        return JsonResponse({'favorites': favorites})
