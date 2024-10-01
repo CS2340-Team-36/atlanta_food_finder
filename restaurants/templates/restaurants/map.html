@@ -15,6 +15,9 @@
         <button onclick="viewFavorites()" class="bg-green-500 text-white font-bold py-2 px-4 rounded shadow-lg hover:bg-green-600 transition duration-300">
             View Favorites
         </button>
+        <button onclick="logout()" class="bg-red-500 text-white font-bold py-2 px-4 rounded shadow-lg hover:bg-red-600 transition duration-300">
+                Logout
+        </button>
     </div>
 
     <!-- Filter Bar -->
@@ -92,6 +95,9 @@
 
             infoWindow = new google.maps.InfoWindow();
 
+            // Load user's favorites on page load
+            loadFavorites();
+
             map.addListener('idle', () => {
                 searchNearbyPlaces(map.getCenter());
             });
@@ -122,9 +128,6 @@
                         if (place.rating && place.rating < minRating) {
                             return false;
                         }
-                        // if (cuisine && !isCuisineMatch(place, cuisine)) {
-                        //     return false;
-                        // }
                         return true;
                     });
 
@@ -141,29 +144,6 @@
                 }
             });
         }
-
-        // function isCuisineMatch(place, cuisine) {
-        //     const cuisineMap = {
-        //         mexican: ['mexican', 'taco'],
-        //         indian: ['indian', 'naan'],
-        //         chinese: ['noodle', 'chinese'],
-        //         italian: ['italian', 'pizza'],
-        //         american: ['burger', 'bbq', 'steak', 'diner', 'fast_food'],
-        //         thai: ['thai'],
-        //         japanese: ['japanese', 'sushi'],
-        //     };
-
-        //     const restaurantTypes = place.types || [];
-        //     const restaurantName = place.name ? place.name.toLowerCase() : '';
-
-        //     if (cuisineMap[cuisine].some(keyword => restaurantName.includes(keyword))) {
-        //         return true;
-        //     }
-
-        //     return cuisineMap[cuisine].some(keyword =>
-        //         restaurantTypes.some(type => type.includes(keyword))
-        //     );
-        // }
 
         function applyFilters() {
             const radius = document.getElementById('radius').value;
@@ -213,13 +193,7 @@
             star.addEventListener('click', function (event) {
                 event.stopPropagation();
                 const isFavorite = star.classList.toggle('text-yellow-500');
-                if (isFavorite) {
-                    favorites.push(place);
-                    showNotification('Added to favorites', 'bg-green-500');
-                } else {
-                    favorites = favorites.filter(fav => fav.place_id !== place.place_id);
-                    showNotification('Removed from favorites', 'bg-red-500');
-                }
+                toggleFavorite(place.name, place.place_id);  // Call the toggle function
             });
 
             google.maps.event.addListener(marker, 'click', () => {
@@ -265,16 +239,85 @@
             restaurantListDiv.innerHTML = '';
         }
 
+        function logout() {
+            // Add your logout logic here, such as clearing authentication tokens and redirecting to the login page
+            console.log('User logged out');
+            window.location.href = "{% url 'logout' %}"
+        }
+
+        // Check if toggleFavorite is called
+        function toggleFavorite(restaurantName, placeId) {
+            console.log(`Toggling favorite for: ${restaurantName} (${placeId})`);
+
+            fetch('/restaurants/toggle-favorite/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')  // CSRF token
+                },
+                body: JSON.stringify({
+                    'restaurant_name': restaurantName,
+                    'place_id': placeId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Favorite response:', data);  // Log the response for debugging
+
+                if (data.favorited) {
+                    showNotification('Added to favorites', 'bg-green-500');
+                } else {
+                    showNotification('Removed from favorites', 'bg-red-500');
+                }
+
+                favorites = data.favorites;  // Update the favorites list
+                console.log('Updated favorites list:', favorites);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+
+        function loadFavorites() {
+            fetch('/restaurants/get-favorites/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                favorites = data.favorites;  // Load favorites from the server
+                console.log('Loaded favorites:', favorites);
+
+                // Mark favorite restaurants on the map or list
+                favorites.forEach(fav => {
+                    const listItem = document.getElementById(fav.restaurant_place_id);
+                    if (listItem) {
+                        const star = listItem.querySelector('.star');
+                        star.classList.add('text-yellow-500');  // Mark as favorite
+                    }
+                });
+            })
+            .catch(error => console.error('Error loading favorites:', error));
+        }
+
+
         function showNotification(message, colorClass) {
             const notification = document.getElementById('notification');
             notification.textContent = message;
-            notification.className = `fixed bottom-4 left-1/2 transform -translate-x-1/2 text-white px-4 py-2 rounded shadow-lg opacity-0 transition-opacity duration-500 ${colorClass}`;
-            notification.classList.add('opacity-100');
+
+            // Reset notification class and apply the new color class
+            notification.className = `fixed bottom-4 left-1/2 transform -translate-x-1/2 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-500 ${colorClass}`;
+
+            // Set opacity to 1 (visible)
+            notification.style.opacity = '1';
 
             setTimeout(() => {
-                notification.classList.remove('opacity-100');
+                // Hide the notification after 2 seconds by setting opacity to 0
+                notification.style.opacity = '0';
             }, 2000);
         }
+
 
         function viewFavorites() {
             const modal = document.getElementById('favoritesModal');
@@ -285,9 +328,9 @@
                 favoritesList.innerHTML = '<li class="text-gray-500">No favorites added yet.</li>';
             } else {
                 favorites.forEach(favorite => {
-                    const formattedName = favorite.name.replace(/\s+/g, '-').toLowerCase();
+                    const formattedName = favorite.restaurant_name.replace(/\s+/g, '-').toLowerCase();
                     const listItem = document.createElement('li');
-                    listItem.innerHTML = `<a href="/restaurants/${formattedName}" class="text-blue-600 hover:underline">${favorite.name}</a>`;
+                    listItem.innerHTML = `<a href="/restaurants/${formattedName}" class="text-blue-600 hover:underline">${favorite.restaurant_name}</a>`;
                     favoritesList.appendChild(listItem);
                 });
             }
@@ -300,6 +343,22 @@
             const modal = document.getElementById('favoritesModal');
             modal.classList.add('pointer-events-none', 'opacity-0');
             modal.classList.remove('opacity-100');
+        }
+
+        // Utility function to get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
     </script>
 
