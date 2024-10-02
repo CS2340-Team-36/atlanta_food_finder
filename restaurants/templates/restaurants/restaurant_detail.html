@@ -47,6 +47,9 @@
         <p>Details are not available.</p>
         {% endif %}
 
+        <!-- Cuisine -->
+        <p><strong>Cuisine:</strong> {{ details.cuisine|default:"N/A" }}</p>
+
         <!-- Rating and Price Level -->
         <p><strong>Rating:</strong> {{ details.rating|default:"N/A" }}</p>
         <p>
