@@ -90,6 +90,6 @@ python manage.py runserver
 ## Contributors:
 1. Akshay Bhave (Full-Stack Developer)
 2. Ananya Pattamatta (Back-End Developer)
-3. Jahanvi Manglik (Product Owner, Developer)
+3. Jahnavi Manglik (Product Owner, Developer)
 4. Manan Khanna (Full-Stack Developer)
 5. Vasanth Gogineni (Scrum Master, Front-End Developer)
