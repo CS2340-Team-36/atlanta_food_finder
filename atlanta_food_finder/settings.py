@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import environ
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -19,17 +21,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-c9q_vo^kr@m$i!k$e+ynbj1hakz$($5s@k$_^iv8-79h3*pzz+'
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-GOOGLE_MAPS_API_KEY_SERVER = 'AIzaSyDe39jHRou9FyAwtXDmqtMG2WglTXs7IkA'
-GOOGLE_MAPS_API_KEY_CLIENT = 'AIzaSyBWRTdA3dHlteX6bWA_w0MX0M0PBxAsd34'
+SECRET_KEY = env('SECRET_KEY')
+
+GOOGLE_MAPS_API_KEY_SERVER = env('GOOGLE_MAPS_API_KEY_SERVER')
+GOOGLE_MAPS_API_KEY_CLIENT = env('GOOGLE_MAPS_API_KEY_CLIENT')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
-GOOGLE_API_KEY = 'AIzaSyDe39jHRou9FyAwtXDmqtMG2WglTXs7IkA'
+GOOGLE_API_KEY = env('GOOGLE_MAPS_API_KEY_SERVER')
 
 # LOGOUT_REDIRECT_URL = '/logged_out/'
 
