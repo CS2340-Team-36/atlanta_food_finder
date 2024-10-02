@@ -12,15 +12,15 @@
 
 
 ## Features
-A. User Authentication
+##### A. User Authentication
 * Users can register an account and log in to access personalized features such as saving favorite restaurants.
-B. Restaurant Search
+##### B. Restaurant Search
 * Search for restaurants by name, cuisine type, or location, with filters for ratings and distance to help users find the best options nearby.
-C. Geolocation
+##### C. Geolocation
 * View restaurant locations on a Google Map interface and click on markers to access detailed information.
-D. Restaurant Details
+##### D. Restaurant Details
 * Access important information about each restaurant, including contact details, cuisine type, address, open hours, ratings, reviews, and directions to the restaurant.
-E. Favorites
+##### E. Favorites
 * Save and manage favorite restaurants for easy access later.
 
 
@@ -34,7 +34,7 @@ Prerequisites:
 ## Installation:
 1. Clone the repository:
  ```sh
-git clone [Your GitHub Repo Link]
+git clone https://github.com/CS2340-Team-36/atlanta_food_finder.git
 ```
 
 2. Install dependencies:
@@ -89,7 +89,7 @@ python manage.py runserver
 
 ## Contributors:
 1. Akshay Bhave (Full-Stack Developer)
-2. Manan Khanna (Ful-Stack Developer)
-3. Vasanth Gogineni (Scrum Master, Develper)
-4. Ananya Pattamatta (Back-End Developer)
-5. Jahanvi Manglik (Product Owner, Developer)
+2. Ananya Pattamatta (Back-End Developer)
+3. Jahanvi Manglik (Product Owner, Developer)
+4. Manan Khanna (Full-Stack Developer)
+5. Vasanth Gogineni (Scrum Master, Front-End Developer)
