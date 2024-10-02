@@ -38,7 +38,7 @@ def restaurant_detail(request, restaurant_name):
         place_details_url = "https://maps.googleapis.com/maps/api/place/details/json"
         details_params = {
             "place_id": place_id,
-            "fields": "name,rating,formatted_address,reviews,opening_hours,price_level,geometry,formatted_phone_number,website",  # Add contact fields
+            "fields": "name,rating,formatted_address,reviews,opening_hours,price_level,geometry,types,editorial_summary,formatted_phone_number,website",  # Add contact fields
             "key": api_key,
         }
 
@@ -54,6 +54,121 @@ def restaurant_detail(request, restaurant_name):
             print("Latitude:", latitude)
             print("Longitude:", longitude)
 
+            types = details.get("types", [])
+            name = details.get("name", "")
+            website = details.get("website", "")
+            editorial_summary = details.get("editorial_summary", {}).get("overview", "")
+            reviews = details.get("reviews", [])
+
+            # Function to determine cuisine
+            def get_cuisine(types, name, website, editorial_summary, reviews):
+                # List of known cuisines
+                cuisines = {
+                    "Chinese": ["chinese", "dim sum", "dumplings"],
+                    "Italian": ["italian", "pasta", "pizza", "risotto"],
+                    "Mexican": [
+                        "mexican",
+                        "tacos",
+                        "burritos",
+                        "enchiladas",
+                        "quesadillas",
+                        "taqueria",
+                    ],
+                    "Indian": ["indian", "curry", "naan", "tandoori"],
+                    "Japanese": ["japanese", "sushi", "ramen", "tempura"],
+                    "Thai": ["thai", "pad thai", "tom yum", "green curry"],
+                    "French": ["french", "baguette", "croissant", "brie"],
+                    "American": ["american", "burger", "fries", "steak"],
+                    "Mediterranean": ["mediterranean", "hummus", "falafel", "pita"],
+                    "Korean": ["korean", "kimchi", "bibimbap", "bulgogi"],
+                    "Vietnamese": ["vietnamese", "pho", "banh mi", "spring rolls"],
+                    "Spanish": ["spanish", "paella", "tapas", "churros"],
+                    "Greek": ["greek", "gyros", "souvlaki", "tzatziki"],
+                    "Middle Eastern": [
+                        "middle eastern",
+                        "shawarma",
+                        "hummus",
+                        "falafel",
+                    ],
+                    "Lebanese": ["lebanese", "tabbouleh", "hummus", "shawarma"],
+                    "Turkish": ["turkish", "kebab", "baklava", "pide"],
+                    "Brazilian": ["brazilian", "feijoada", "churrasco", "brigadeiro"],
+                    "Caribbean": ["caribbean", "jerk chicken", "plantains"],
+                    "Ethiopian": ["ethiopian", "injera", "doro wat", "berbere"],
+                    "German": ["german", "bratwurst", "sauerkraut", "pretzel"],
+                    "Irish": ["irish", "shepherd's pie", "corned beef", "guinness"],
+                    "Russian": ["russian", "borscht", "pelmeni", "blini"],
+                    "Polish": ["polish", "pierogi", "kielbasa"],
+                    "African": ["african", "jollof", "fufu", "injera"],
+                    "Australian": ["australian", "vegemite", "meat pie"],
+                    "Belgian": ["belgian", "waffles", "chocolate"],
+                    "Cuban": ["cuban", "ropa vieja", "cubano sandwich"],
+                    "Filipino": ["filipino", "adobo", "pancit", "lechon"],
+                    "Hawaiian": ["hawaiian", "poke", "spam musubi"],
+                    "Hungarian": ["hungarian", "goulash", "langos"],
+                    "Indonesian": ["indonesian", "satay", "nasi goreng"],
+                    "Malaysian": ["malaysian", "laksa", "satay"],
+                    "Pakistani": ["pakistani", "biryani", "nihari"],
+                    "Peruvian": ["peruvian", "ceviche", "lomo saltado"],
+                    "Portuguese": ["portuguese", "bacalhau", "pastel de nata"],
+                    "Scottish": ["scottish", "haggis", "scotch pie"],
+                    "South African": ["south african", "biltong", "bobotie"],
+                    "Swedish": ["swedish", "meatballs", "gravlax"],
+                    "Taiwanese": ["taiwanese", "beef noodle soup", "bubble tea"],
+                    "Tex-Mex": ["tex-mex", "nachos", "fajitas"],
+                    "Seafood": ["seafood", "lobster", "crab", "shrimp"],
+                    "Steakhouse": ["steakhouse", "steak", "ribeye", "sirloin"],
+                    "BBQ": ["bbq", "ribs", "brisket", "pulled pork"],
+                    "Cafe": ["cafe", "coffee", "espresso", "latte"],
+                    "Bakery": ["bakery", "bread", "croissant", "bagel"],
+                    "Deli": ["deli", "sandwich", "bagel", "pastrami"],
+                    "Bistro": ["bistro", "crepe", "quiche"],
+                    "Pub": ["pub", "ale", "fish and chips"],
+                    "Grill": ["grill", "barbecue"],
+                    "Fusion": ["fusion", "mix", "blend"],
+                }
+
+                # Step 1: Check for specific types in the Google Places API 'types' field
+                for t in types:
+                    if t.endswith("_restaurant"):
+                        cuisine_type = (
+                            t.replace("_restaurant", "").replace("_", " ").title()
+                        )
+                        return cuisine_type
+
+                # Step 2: Prioritize checking the restaurant name
+                name_lower = name.lower()
+                for cuisine, keywords in cuisines.items():
+                    if any(keyword in name_lower for keyword in keywords):
+                        return cuisine
+
+                # Step 3: Check the editorial summary for keywords
+                if editorial_summary:
+                    summary_lower = editorial_summary.lower()
+                    for cuisine, keywords in cuisines.items():
+                        if any(keyword in summary_lower for keyword in keywords):
+                            return cuisine
+
+                # Step 4: Check all reviews for cuisine mentions
+                for review in reviews:
+                    review_text = review.get("text", "").lower()
+                    for cuisine, keywords in cuisines.items():
+                        if any(keyword in review_text for keyword in keywords):
+                            return cuisine
+
+                # Step 5: Check the website URL for cuisine keywords
+                if website:
+                    website_lower = website.lower()
+                    for cuisine, keywords in cuisines.items():
+                        if any(keyword in website_lower for keyword in keywords):
+                            return cuisine
+
+                # Default to 'Unknown' if no match is found
+                return "Unknown"
+
+            # Get cuisine
+            cuisine = get_cuisine(types, name, website, editorial_summary, reviews)
+
             context = {
                 "restaurant_name": details.get("name", formatted_name),
                 "details": {
@@ -68,6 +183,7 @@ def restaurant_detail(request, restaurant_name):
                     "reviews": details.get("reviews", []),
                     "latitude": latitude,
                     "longitude": longitude,
+                    "cuisine": cuisine,
                     "phone_number": details.get("formatted_phone_number", "N/A"),  # Add phone number
                     "website": details.get("website", ""),  # Add website
                     "place_id": place_id,  # Pass the place_id to the template
@@ -85,6 +201,7 @@ def restaurant_detail(request, restaurant_name):
                     "reviews": [],
                     "latitude": None,
                     "longitude": None,
+                    "cuisine": "N/A",
                     "phone_number": "N/A",  # Default phone number
                     "website": "",  # Default website
                     "place_id": None,
@@ -102,6 +219,7 @@ def restaurant_detail(request, restaurant_name):
                 "reviews": [],
                 "latitude": None,
                 "longitude": None,
+                "cuisine": "N/A",
                 "phone_number": "N/A",  # Default phone number
                 "website": "",  # Default website
                 "place_id": None,

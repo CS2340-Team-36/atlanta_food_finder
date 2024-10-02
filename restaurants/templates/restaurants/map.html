@@ -127,57 +127,57 @@
         }
 
         function searchNearbyPlaces(location, searchQuery = '') {
-    const radius = document.getElementById('radius').value || '8047'; // Default radius
-    const cuisine = document.getElementById('cuisine').value; // Get selected cuisine
-    const minRating = document.getElementById('rating').value || '0'; // Minimum rating
+            const radius = document.getElementById('radius').value || '8047'; // Default radius
+            const cuisine = document.getElementById('cuisine').value; // Get selected cuisine
+            const minRating = document.getElementById('rating').value || '0'; // Minimum rating
 
-    const request = {
-        location: location,
-        radius: radius,
-        types: ['restaurant', 'cafe', 'diner', 'bakery', 'brewery', 'bar'],
-    };
+            const request = {
+                location: location,
+                radius: radius,
+                types: ['restaurant', 'cafe', 'diner', 'bakery', 'brewery', 'bar'],
+            };
 
-    // If searchQuery is provided, use it for the search
-    if (searchQuery) {
-        request.keyword = searchQuery; // Use the search query as the main focus
-    } else if (cuisine) {
-        // If no searchQuery, apply the cuisine filter
-        request.keyword = cuisine;
-    }
-
-    const service = new google.maps.places.PlacesService(map);
-
-    clearMarkers();
-
-    service.nearbySearch(request, (results, status, pagination) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK) {
-            const filteredResults = results.filter(place => {
-                // Apply minimum rating filter
-                if (place.rating && place.rating < minRating) {
-                    return false;
-                }
-
-                // If a search query is present, it should override other filters
-                if (searchQuery && !place.name.toLowerCase().includes(searchQuery)) {
-                    return false;
-                }
-
-                return true;
-            });
-
-            filteredResults.forEach(place => {
-                placesById[place.place_id] = place;
-                createMarker(place);
-            });
-
-            if (pagination && pagination.hasNextPage) {
-                setTimeout(() => {
-                    pagination.nextPage();
-                }, 2000);
+            // If searchQuery is provided, use it for the search
+            if (searchQuery) {
+                request.keyword = searchQuery; // Use the search query as the main focus
+            } else if (cuisine) {
+                // If no searchQuery, apply the cuisine filter
+                request.keyword = cuisine;
             }
+
+            const service = new google.maps.places.PlacesService(map);
+
+            clearMarkers();
+
+            service.nearbySearch(request, (results, status, pagination) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    const filteredResults = results.filter(place => {
+                        // Apply minimum rating filter
+                        if (place.rating && place.rating < minRating) {
+                            return false;
+                        }
+
+                        // If a search query is present, it should override other filters
+                        if (searchQuery && !place.name.toLowerCase().includes(searchQuery)) {
+                            return false;
+                        }
+
+                        return true;
+                    });
+
+                    filteredResults.forEach(place => {
+                        placesById[place.place_id] = place;
+                        createMarker(place);
+                    });
+
+                    if (pagination && pagination.hasNextPage) {
+                        setTimeout(() => {
+                            pagination.nextPage();
+                        }, 2000);
+                    }
+                }
+            });
         }
-    });
-}
 
 
 
