@@ -83,8 +83,8 @@ python manage.py runserver
 
 ## Links:
 1. Live Demo:
-2. Documentation
-3. GitHub Repository
+2. GitHub Repository: https://github.com/CS2340-Team-36/atlanta_food_finder
+3. Kanban Board: https://trello.com/b/8RSIMMko
 
 
 ## Contributors:
