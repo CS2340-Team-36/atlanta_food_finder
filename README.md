@@ -1,7 +1,7 @@
 # Atlanta Food Finder
 
 > ### Disclaimer:
-> The application was developed as part of a team project for 2340-B and is designed to be both a fun and valuable portfolio piece.
+> The application was developed as part of a Team 36's project for 2340-B in **September 2024** and is designed to be both a fun and valuable portfolio piece.
 > The project emphasizes the application of software engineering concepts and serves as an opportunity to reinforce key skills in web development.
 
 * Atlanta Food Finder is a web application designed to help Atlantians discover restaurants in their area.
