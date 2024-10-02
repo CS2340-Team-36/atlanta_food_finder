@@ -12,57 +12,75 @@
     </form>
     
     <!-- Top Section with Centered Title and Right-Aligned Button -->
-    <div class="flex justify-between items-center bg-white shadow p-4">
-        <!-- Placeholder to keep title centered -->
-        <div class="w-24"></div>
-        <h1 class="text-2xl font-bold text-blue-600 text-center">Restaurant Map</h1>
+<div class="flex justify-between items-center bg-white shadow p-4">
+    <h1 class="text-2xl font-bold text-blue-600 text-center w-full">Restaurant Map</h1>
+    <div class="flex space-x-2"> <!-- Buttons are aligned together on the right -->
         <button onclick="viewFavorites()" class="bg-green-500 text-white font-bold py-2 px-4 rounded shadow-lg hover:bg-green-600 transition duration-300">
             View Favorites
         </button>
         <button onclick="logout()" class="bg-red-500 text-white font-bold py-2 px-4 rounded shadow-lg hover:bg-red-600 transition duration-300">
-                Logout
+            Logout
         </button>
     </div>
+</div>
 
-    <!-- Filter Bar -->
-    <div id="filter-bar" class="bg-blue-500 text-white p-4 flex justify-around items-center shadow-md">
-        <div class="flex items-center">
-            <label for="radius" class="font-semibold mr-2">Radius:</label>
-            <select id="radius" class="p-2 rounded bg-white text-gray-800">
-                <option value="8047">5 miles</option>
-                <option value="16094">10 miles</option>
-                <option value="32187">20 miles</option>
-            </select>
-        </div>
 
-        <div class="flex items-center">
-            <label for="cuisine" class="font-semibold mr-2">Cuisine:</label>
-            <select id="cuisine" class="p-2 rounded bg-white text-gray-800">
-                <option value="">All</option>
-                <option value="mexican">Mexican</option>
-                <option value="indian">Indian</option>
-                <option value="chinese">Chinese</option>
-                <option value="italian">Italian</option>
-                <option value="american">American</option>
-                <option value="thai">Thai</option>
-                <option value="japanese">Japanese</option>
-            </select>
-        </div>
+<!-- Filter Bar with Search and Clear Filters Button -->
+<div id="filter-bar" class="bg-blue-500 text-white p-4 flex justify-around items-center shadow-md">
+    <!-- Radius Filter -->
+    <div class="flex items-center">
+        <label for="radius" class="font-semibold mr-2">Radius:</label>
+        <select id="radius" class="p-2 rounded bg-white text-gray-800">
+            <option value="8047">5 miles</option>
+            <option value="16094">10 miles</option>
+            <option value="32187">20 miles</option>
+        </select>
+    </div>
 
-        <div class="flex items-center">
-            <label for="rating" class="font-semibold mr-2">Minimum Rating:</label>
-            <select id="rating" class="p-2 rounded bg-white text-gray-800">
-                <option value="0">All</option>
-                <option value="3.5">3.5+</option>
-                <option value="4">4.0+</option>
-                <option value="4.5">4.5+</option>
-            </select>
-        </div>
+    <!-- Cuisine Filter -->
+    <div class="flex items-center">
+        <label for="cuisine" class="font-semibold mr-2">Cuisine:</label>
+        <select id="cuisine" class="p-2 rounded bg-white text-gray-800">
+            <option value="">All</option>
+            <option value="mexican">Mexican</option>
+            <option value="indian">Indian</option>
+            <option value="chinese">Chinese</option>
+            <option value="italian">Italian</option>
+            <option value="american">American</option>
+            <option value="thai">Thai</option>
+            <option value="japanese">Japanese</option>
+        </select>
+    </div>
 
+    <!-- Rating Filter -->
+    <div class="flex items-center">
+        <label for="rating" class="font-semibold mr-2">Minimum Rating:</label>
+        <select id="rating" class="p-2 rounded bg-white text-gray-800">
+            <option value="0">All</option>
+            <option value="3.5">3.5+</option>
+            <option value="4">4.0+</option>
+            <option value="4.5">4.5+</option>
+        </select>
+    </div>
+
+    <!-- Search Bar for Restaurant Name -->
+    <div class="flex items-center">
+        <label for="search" class="font-semibold mr-2">Search:</label>
+        <input id="search" type="text" class="p-2 rounded bg-white text-gray-800" placeholder="Enter restaurant name" />
+    </div>
+
+    <div class="flex space-x-4">
+        <!-- Apply Filters Button -->
         <button onclick="applyFilters()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded shadow-lg transition duration-300">
             Apply Filters
         </button>
+
+        <!-- Clear Filters Button -->
+        <button onclick="clearFilters()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded shadow-lg transition duration-300">
+            Clear Filters
+        </button>
     </div>
+</div>
 
     <div id="info" class="p-4"></div>
     <div id="map" class="h-screen w-2/3 float-left border-r-2 border-gray-300"></div>
@@ -108,57 +126,85 @@
             });
         }
 
-        function searchNearbyPlaces(location) {
-            const radius = document.getElementById('radius').value || '8047';
-            const cuisine = document.getElementById('cuisine').value;
-            const minRating = document.getElementById('rating').value || '0';
+        function searchNearbyPlaces(location, searchQuery = '') {
+    const radius = document.getElementById('radius').value || '8047'; // Default radius
+    const cuisine = document.getElementById('cuisine').value; // Get selected cuisine
+    const minRating = document.getElementById('rating').value || '0'; // Minimum rating
 
-            const request = {
-                location: location,
-                radius: radius,
-                types: ['restaurant', 'cafe', 'diner', 'bakery', 'brewery', 'bar'],
-            };
+    const request = {
+        location: location,
+        radius: radius,
+        types: ['restaurant', 'cafe', 'diner', 'bakery', 'brewery', 'bar'],
+    };
 
-            if (cuisine) {
-                request.keyword = cuisine
-            }
+    // If searchQuery is provided, use it for the search
+    if (searchQuery) {
+        request.keyword = searchQuery; // Use the search query as the main focus
+    } else if (cuisine) {
+        // If no searchQuery, apply the cuisine filter
+        request.keyword = cuisine;
+    }
 
-            const service = new google.maps.places.PlacesService(map);
+    const service = new google.maps.places.PlacesService(map);
 
-            clearMarkers();
+    clearMarkers();
 
-            service.nearbySearch(request, (results, status, pagination) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    const filteredResults = results.filter(place => {
-                        if (place.rating && place.rating < minRating) {
-                            return false;
-                        }
-                        return true;
-                    });
-
-                    filteredResults.forEach(place => {
-                        placesById[place.place_id] = place;
-                        createMarker(place);
-                    });
-
-                    if (pagination && pagination.hasNextPage) {
-                        setTimeout(() => {
-                            pagination.nextPage();
-                        }, 2000);
-                    }
+    service.nearbySearch(request, (results, status, pagination) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+            const filteredResults = results.filter(place => {
+                // Apply minimum rating filter
+                if (place.rating && place.rating < minRating) {
+                    return false;
                 }
+
+                // If a search query is present, it should override other filters
+                if (searchQuery && !place.name.toLowerCase().includes(searchQuery)) {
+                    return false;
+                }
+
+                return true;
             });
+
+            filteredResults.forEach(place => {
+                placesById[place.place_id] = place;
+                createMarker(place);
+            });
+
+            if (pagination && pagination.hasNextPage) {
+                setTimeout(() => {
+                    pagination.nextPage();
+                }, 2000);
+            }
         }
+    });
+}
+
+
+
 
         function applyFilters() {
             const radius = document.getElementById('radius').value;
             const cuisine = document.getElementById('cuisine').value;
             const rating = document.getElementById('rating').value;
+            const searchQuery = document.getElementById('search').value.toLowerCase();  // New search term
 
-            console.log(`Filters - Radius: ${radius}, Cuisine: ${cuisine}, Rating: ${rating}`);
+            console.log(`Filters - Radius: ${radius}, Cuisine: ${cuisine}, Rating: ${rating}, Search: ${searchQuery}`);
 
-            searchNearbyPlaces(map.getCenter());
+            // Call searchNearbyPlaces with map center and apply search by name
+            searchNearbyPlaces(map.getCenter(), searchQuery);
         }
+
+        function clearFilters() {
+            // Reset all filters to default values
+            document.getElementById('radius').value = '8047';  // 5 miles default
+            document.getElementById('cuisine').value = '';     // All cuisines
+            document.getElementById('rating').value = '0';     // All ratings
+            document.getElementById('search').value = '';      // Clear search input
+
+            // Reapply the filters with default values
+            applyFilters();
+        }
+
 
         function createMarker(place) {
             const marker = new google.maps.Marker({

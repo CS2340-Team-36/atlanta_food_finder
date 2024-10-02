@@ -38,7 +38,7 @@ def restaurant_detail(request, restaurant_name):
         place_details_url = "https://maps.googleapis.com/maps/api/place/details/json"
         details_params = {
             "place_id": place_id,
-            "fields": "name,rating,formatted_address,reviews,opening_hours,price_level,geometry",
+            "fields": "name,rating,formatted_address,reviews,opening_hours,price_level,geometry,formatted_phone_number,website",  # Add contact fields
             "key": api_key,
         }
 
@@ -68,6 +68,9 @@ def restaurant_detail(request, restaurant_name):
                     "reviews": details.get("reviews", []),
                     "latitude": latitude,
                     "longitude": longitude,
+                    "phone_number": details.get("formatted_phone_number", "N/A"),  # Add phone number
+                    "website": details.get("website", ""),  # Add website
+                    "place_id": place_id,  # Pass the place_id to the template
                 },
                 "GOOGLE_MAPS_API_KEY_CLIENT": settings.GOOGLE_MAPS_API_KEY_CLIENT,
             }
@@ -82,6 +85,9 @@ def restaurant_detail(request, restaurant_name):
                     "reviews": [],
                     "latitude": None,
                     "longitude": None,
+                    "phone_number": "N/A",  # Default phone number
+                    "website": "",  # Default website
+                    "place_id": None,
                 },
                 "GOOGLE_MAPS_API_KEY_CLIENT": settings.GOOGLE_MAPS_API_KEY_CLIENT,
             }
@@ -96,6 +102,9 @@ def restaurant_detail(request, restaurant_name):
                 "reviews": [],
                 "latitude": None,
                 "longitude": None,
+                "phone_number": "N/A",  # Default phone number
+                "website": "",  # Default website
+                "place_id": None,
             },
             "GOOGLE_MAPS_API_KEY_CLIENT": settings.GOOGLE_MAPS_API_KEY_CLIENT,
         }
