@@ -3,14 +3,18 @@ import re
 from django.shortcuts import render
 from django.conf import settings
 from .models import Restaurant
+from django.http import JsonResponse
+from .models import Restaurant, Favorite
+from django.contrib.auth.decorators import login_required
+import json
 
-
+@login_required
 def restaurant_map(request):
     restaurants = Restaurant.objects.all()
     context = {"restaurants": restaurants}
     return render(request, "restaurants/map.html", context)
 
-
+@login_required
 def restaurant_detail(request, restaurant_name):
     formatted_name = restaurant_name.replace("-", " ").title()
 
@@ -35,7 +39,9 @@ def restaurant_detail(request, restaurant_name):
         place_details_url = "https://maps.googleapis.com/maps/api/place/details/json"
         details_params = {
             "place_id": place_id,
-            "fields": "name,rating,formatted_address,reviews,opening_hours,price_level,geometry,types,editorial_summary,website",
+
+            "fields": "name,rating,formatted_address,reviews,opening_hours,price_level,geometry,types,editorial_summary,formatted_phone_number,website",  # Add contact fields
+
             "key": api_key,
         }
 
@@ -182,6 +188,9 @@ def restaurant_detail(request, restaurant_name):
                     "latitude": latitude,
                     "longitude": longitude,
                     "cuisine": cuisine,  # Add cuisine to context
+                    "phone_number": details.get("formatted_phone_number", "N/A"),  # Add phone number
+                    "website": details.get("website", ""),  # Add website
+                    "place_id": place_id,  # Pass the place_id to the template
                 },
                 "GOOGLE_MAPS_API_KEY_CLIENT": settings.GOOGLE_MAPS_API_KEY_CLIENT,
             }
@@ -197,6 +206,9 @@ def restaurant_detail(request, restaurant_name):
                     "latitude": None,
                     "longitude": None,
                     "cuisine": "N/A",  # Default value when details are unavailable
+                    "phone_number": "N/A",  # Default phone number
+                    "website": "",  # Default website
+                    "place_id": None,
                 },
                 "GOOGLE_MAPS_API_KEY_CLIENT": settings.GOOGLE_MAPS_API_KEY_CLIENT,
             }
@@ -212,8 +224,68 @@ def restaurant_detail(request, restaurant_name):
                 "latitude": None,
                 "longitude": None,
                 "cuisine": "N/A",  # Default value when no candidates found
+                "phone_number": "N/A",  # Default phone number
+                "website": "",  # Default website
+                "place_id": None,
             },
             "GOOGLE_MAPS_API_KEY_CLIENT": settings.GOOGLE_MAPS_API_KEY_CLIENT,
         }
 
     return render(request, "restaurants/restaurant_detail.html", context)
+
+
+def ajax_login_required(function):
+    def wrap(request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return function(request, *args, **kwargs)
+        else:
+            return JsonResponse({'error': 'You must be logged in to perform this action.'}, status=401)
+    return wrap
+
+@ajax_login_required
+def toggle_favorite(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        restaurant_name = data.get('restaurant_name')
+        place_id = data.get('place_id')
+
+        user = request.user
+
+        favorite, created = Favorite.objects.get_or_create(
+            user=user,
+            restaurant_place_id=place_id,
+            defaults={'restaurant_name': restaurant_name}
+        )
+
+        if not created:
+            # Favorite already exists, so remove it
+            favorite.delete()
+            favorited = False
+        else:
+            # Favorite was created
+            favorited = True
+
+        # Return the updated list of favorites
+        favorites = Favorite.objects.filter(user=user)
+        favorites_list = [{
+            'restaurant_name': fav.restaurant_name,
+            'restaurant_place_id': fav.restaurant_place_id
+        } for fav in favorites]
+
+        return JsonResponse({'favorited': favorited, 'favorites': favorites_list})
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@ajax_login_required
+def get_favorites(request):
+    if request.method == 'GET':
+        user = request.user
+        favorites = Favorite.objects.filter(user=user)
+        favorites_list = [{
+            'restaurant_name': fav.restaurant_name,
+            'restaurant_place_id': fav.restaurant_place_id
+        } for fav in favorites]
+
+        return JsonResponse({'favorites': favorites_list})
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)

@@ -56,6 +56,22 @@
           <strong>Price Level:</strong> {{ details.price_level|default:"N/A" }}
         </p>
 
+      <!-- Contact Information -->
+        <p><strong>Contact Information:</strong></p>
+        <ul class="list-disc pl-5">
+          {% if details.phone_number %}
+          <li>Phone: {{ details.phone_number }}</li>
+          {% else %}
+          <li>Phone number not available.</li>
+          {% endif %}
+
+          {% if details.website %}
+          <li>Website: <a href="{{ details.website }}" class="text-blue-600 hover:underline" target="_blank">{{ details.website }}</a></li>
+          {% else %}
+          <li>Website not available.</li>
+          {% endif %}
+        </ul>
+
         <!-- Opening Hours -->
         <p><strong>Opening Hours:</strong></p>
         <ul class="list-disc pl-5">
@@ -115,14 +131,15 @@
         console.log("Initializing the map...");
 
         // Parse the latitude and longitude
-        restaurantLat = parseFloat(restaurantLat);
-        restaurantLng = parseFloat(restaurantLng);
+        restaurantLat = parseFloat("{{ details.latitude|default:'null'|escapejs }}");
+        restaurantLng = parseFloat("{{ details.longitude|default:'null'|escapejs }}");
+        const placeId = "{{ details.place_id|default:'null'|escapejs }}"; // Ensure the placeId is available
 
-        // Check if latitude and longitude are valid numbers
-        if (isNaN(restaurantLat) || isNaN(restaurantLng)) {
-          console.error("Latitude and/or Longitude values are invalid.");
-          alert("Location data is not available.");
-          return;
+        // Check if latitude, longitude, and placeId are valid
+        if (isNaN(restaurantLat) || isNaN(restaurantLng) || !placeId) {
+            console.error("Latitude, Longitude or Place ID is invalid.");
+            alert("Location data is not available.");
+            return;
         }
 
         // Restaurant coordinates
@@ -130,8 +147,31 @@
 
         // Initialize the map centered at the restaurant location
         map = new google.maps.Map(document.getElementById("map"), {
-          zoom: 14,
-          center: restaurantLocation,
+            zoom: 14,
+            center: restaurantLocation,
+        });
+
+        // Get Place Details including contact information
+        const service = new google.maps.places.PlacesService(map);
+        service.getDetails({ placeId: placeId }, (place, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                console.log("Place details fetched successfully:", place);
+
+                // Update the contact information in the HTML
+                if (place.formatted_phone_number) {
+                    document.getElementById('phone').innerText = `Phone: ${place.formatted_phone_number}`;
+                } else {
+                    document.getElementById('phone').innerText = 'Phone number not available.';
+                }
+
+                if (place.website) {
+                    document.getElementById('website').innerHTML = `Website: <a href="${place.website}" class="text-blue-600 hover:underline" target="_blank">${place.website}</a>`;
+                } else {
+                    document.getElementById('website').innerText = 'Website not available.';
+                }
+            } else {
+                console.error("Failed to fetch place details:", status);
+            }
         });
 
         // Directions Service and Renderer
@@ -141,30 +181,28 @@
 
         // Get user's current location
         if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              console.log("User location obtained.");
-              const userLocation = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-              };
-              calculateAndDisplayRoute(
-                directionsService,
-                directionsRenderer,
-                userLocation,
-                restaurantLocation
-              );
-            },
-            (error) => {
-              console.error("Error obtaining geolocation: ", error);
-              handleLocationError(true, map.getCenter());
-            }
-          );
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    };
+                    calculateAndDisplayRoute(
+                        directionsService,
+                        directionsRenderer,
+                        userLocation,
+                        restaurantLocation
+                    );
+                },
+                (error) => {
+                    console.error("Error obtaining geolocation: ", error);
+                    handleLocationError(true, map.getCenter());
+                }
+            );
         } else {
-          // Browser doesn't support Geolocation
-          handleLocationError(false, map.getCenter());
+            handleLocationError(false, map.getCenter());
         }
-      }
+    }
 
       function calculateAndDisplayRoute(
         directionsService,
