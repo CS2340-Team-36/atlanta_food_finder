@@ -82,7 +82,7 @@ python manage.py runserver
 [Python-url]: https://www.python.org/
 
 ## Links:
-1. Live Demo:
+1. Team Website: https://ananyapattamatta7.wixstudio.io/atl-food-team36
 2. GitHub Repository: https://github.com/CS2340-Team-36/atlanta_food_finder
 3. Kanban Board: https://trello.com/b/8RSIMMko
 
